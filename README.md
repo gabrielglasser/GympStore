@@ -22,4 +22,4 @@ Gymp Store é um e-commerce moderno focado na venda de suplementos e acessórios
 
 1. Clone este repositório:
    ```sh
-   git clone https://github.com/seu-usuario/gymp-store.git
+   git clone https://github.com/gabrielglasser/GympStore.git
