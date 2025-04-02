@@ -1,2 +1,25 @@
-# GympStore
-Gymp Store é uma plataforma online focada na venda de suplementos e acessórios para academia. Com um design moderno e intuitivo, nosso objetivo é proporcionar a melhor experiência de compra para atletas e entusiastas do fitness, oferecendo produtos de alta qualidade com as melhores condições do mercado.
+# Gymp Store 🏋️‍♂️💪
+
+Gymp Store é um e-commerce moderno focado na venda de suplementos e acessórios para academia. Nossa plataforma oferece uma experiência intuitiva e dinâmica, permitindo que os usuários encontrem os melhores produtos para potencializar seus resultados.
+
+## 🚀 Tecnologias Utilizadas
+
+- **Frontend:** React, Next.js, Sass 
+- **Backend:** Node.js, Express, PostgreSQL, Prisma
+- **Autenticação:** JWT  
+- **Hospedagem:** Vercel 
+- **Banco de Dados:** PostgreSQL  
+
+## 📌 Funcionalidades
+
+✔️ Catálogo de produtos com categorias  
+✔️ Sistema de carrinho de compras  
+✔️ Checkout e integração com métodos de pagamento  
+✔️ Autenticação e gerenciamento de usuários  
+✔️ Design responsivo e intuitivo  
+
+## 🛠️ Como Rodar o Projeto
+
+1. Clone este repositório:
+   ```sh
+   git clone https://github.com/seu-usuario/gymp-store.git
