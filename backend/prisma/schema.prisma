@@ -7,6 +7,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+client {
+  log = ["query", "info", "warn", "error"]
+}
+
 model User {
   id        String    @id @default(uuid())
   name      String
