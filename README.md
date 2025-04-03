@@ -4,8 +4,8 @@ Gymp Store é um e-commerce moderno focado na venda de suplementos e acessórios
 
 ## 🚀 Tecnologias Utilizadas
 
-- **Frontend:** React, Next.js, Sass 
-- **Backend:** Node.js, Express, PostgreSQL, Prisma
+- **Frontend:** React, Next.js, Sass (em andamento)
+- **Backend:** Node.js, Express, PostgreSQL, Prisma (em andamento)
 - **Autenticação:** JWT  
 - **Hospedagem:** Vercel 
 - **Banco de Dados:** PostgreSQL  
