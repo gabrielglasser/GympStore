@@ -2,9 +2,9 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import ApiError from "../utils/apiError";
 import { PrismaClient } from "@prisma/client";
+import { AuthenticatedRequest } from "../types/customRequest";
 
 const prisma = new PrismaClient();
-
 
 const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -21,8 +21,7 @@ const authMiddleware = async (req: Request, res: Response, next: NextFunction) =
       throw new ApiError(401, 'Não autorizado - Usuário não encontrado');
     }
 
-    // Adiciona o usuário ao request
-    req.user = user;
+    (req as AuthenticatedRequest).user = user;
     next();
   } catch (error) {
     next(error);
