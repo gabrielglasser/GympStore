@@ -12,43 +12,46 @@ interface AuthenticatedRequest extends Request {
 
 const authMiddleware = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
+    // 1. Verifica se o header existe
     const authHeader = req.headers.authorization;
-    
     if (!authHeader?.startsWith('Bearer ')) {
-      throw new ApiError(401, 'Não autorizado - Formato de token inválido');
+      throw new ApiError(401, 'Formato de token inválido');
     }
 
+    // 2. Extrai o token
     const token = authHeader.split(' ')[1];
     
-    // Verificação do token com tratamento de erros específico
-    let decoded;
-    try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string };
-    } catch (error) {
-      if (error instanceof jwt.TokenExpiredError) {
-        throw new ApiError(401, 'Sessão expirada - Faça login novamente');
-      }
-      throw new ApiError(401, 'Não autorizado - Token inválido');
-    }
-
-    const user = await prisma.user.findUnique({ 
+    // 3. Verifica e decodifica o token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string };
+    
+    // 4. Busca o usuário SEM a senha
+    const user = await prisma.user.findUnique({
       where: { id: decoded.id },
-      select: { id: true, name: true, email: true, role: true }
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true
+      }
     });
 
     if (!user) {
-      throw new ApiError(401, 'Não autorizado - Usuário não encontrado');
+      throw new ApiError(401, 'Usuário não encontrado');
     }
 
+    // 5. Adiciona o usuário ao request
     req.user = user;
     next();
   } catch (error) {
-    if (error instanceof ApiError) {
-      next(error);
-    } else {
-      console.error('Erro no authMiddleware:', error);
-      next(new ApiError(500, 'Erro durante a autenticação'));
+    console.error('Erro na autenticação:', error); // Log detalhado
+    
+    if (error instanceof jwt.TokenExpiredError) {
+      return next(new ApiError(401, 'Token expirado'));
     }
+    if (error instanceof jwt.JsonWebTokenError) {
+      return next(new ApiError(401, 'Token inválido'));
+    }
+    next(error);
   }
 };
 
