@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from 'express';
-import ApiError from '../utils/apiError';
+import { Request, Response, NextFunction } from "express";
+import ApiError from "../utils/apiError";
 
 const errorMiddleware = (
   err: Error,
@@ -10,14 +10,14 @@ const errorMiddleware = (
   if (err instanceof ApiError) {
     return res.status(err.statusCode).json({
       success: false,
-      message: err.message,
+      message: err.message
     });
   }
 
-  console.error(err);
-  return res.status(500).json({
+  console.error(err.stack);
+  res.status(500).json({
     success: false,
-    message: 'Erro interno no servidor',
+    message: 'Erro interno no servidor'
   });
 };
 

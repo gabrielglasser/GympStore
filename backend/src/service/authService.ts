@@ -4,8 +4,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 const prisma = new PrismaClient();
-const JWT_SECRET: jwt.Secret = process.env.JWT_SECRET || "your-secret-key";
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "1d";
+const JWT_SECRET = process.env.JWT_SECRET || "seu_segredo_super_secreto";
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN;
 
 class AuthService {
   async login(email: string, password: string): Promise<{ token: string, user: any }> {
@@ -25,7 +25,7 @@ class AuthService {
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
       JWT_SECRET,
-      { expiresIn: parseInt(JWT_EXPIRES_IN, 10) }
+      { expiresIn: parseInt(JWT_EXPIRES_IN || "3600") }
     );
 
     // Remove a senha antes de retornar
