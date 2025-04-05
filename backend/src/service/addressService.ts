@@ -30,30 +30,40 @@ class AddressService {
   }
 
   async createAddress(userId: string, input: CreateAddressInput): Promise<AddressWithUser> {
+    // Verifica se o usuário existe
+    const userExists = await prisma.user.findUnique({
+        where: { id: userId }
+    });
+    
+    if (!userExists) {
+        throw new ApiError(404, "Usuário não encontrado");
+    }
+
     // Se for o primeiro endereço, define como padrão
     const userAddresses = await this.getAddressesByUserId(userId);
     const isDefault = userAddresses.length === 0 ? true : input.isDefault || false;
 
     // Se definido como padrão, remove o padrão dos outros endereços
     if (isDefault) {
-      await prisma.address.updateMany({
-        where: { userId, isDefault: true },
-        data: { isDefault: false }
-      });
+        await prisma.address.updateMany({
+            where: { userId, isDefault: true },
+            data: { isDefault: false }
+        });
     }
 
+    // Cria o endereço CORRETAMENTE
     return await prisma.address.create({
-      data: {
-        ...input,
-        userId,
-        isDefault,
-        country: input.country || "Brasil"
-      },
-      include: {
-        user: true
-      }
+        data: {
+            ...input,
+            userId, 
+            isDefault,
+            country: input.country || "Brasil"
+        },
+        include: {
+            user: true
+        }
     });
-  }
+}
 
   async updateAddress(input: UpdateAddressInput): Promise<AddressWithUser> {
     const addressExists = await prisma.address.findUnique({

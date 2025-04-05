@@ -5,8 +5,11 @@ import morgan from 'morgan';
 import routes from './routes';
 import errorMiddleware from './middleware/errorMiddleware';
 import { Request, Response, NextFunction } from 'express';
+import swaggerRouter from './swagger';
 
 const app = express();
+
+app.use(swaggerRouter);
 
 // Middlewares
 app.use(cors());
