@@ -1,13 +1,26 @@
 export interface Product {
-    id: number;
-    title: string;
-    category: string;
-    price: number;
-    image: string;
-  }
-  
-  export interface User {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  images: string[];
+  categoryId: string;
+  category: {
     id: string;
-    email: string;
     name: string;
-  }
+    slug: string;
+  };
+  brand: string;
+  weight: number;
+  flavor?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: 'USER' | 'ADMIN';
+}

@@ -4,10 +4,10 @@ import ApiError from "../utils/apiError";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
+const JWT_SECRET = process.env.JWT_SECRET || "seu_segredo_super_secreto"; // Garante que temos um valor
 
-// Interface local para garantir a tipagem
 interface AuthenticatedRequest extends Request {
-  user?: any; 
+  user?: any;
 }
 
 const authMiddleware = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
@@ -15,16 +15,16 @@ const authMiddleware = async (req: AuthenticatedRequest, res: Response, next: Ne
     // 1. Verifica se o header existe
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith('Bearer ')) {
-      throw new ApiError(401, 'Formato de token inválido');
+      throw new ApiError(401, 'Token não fornecido');
     }
 
     // 2. Extrai o token
     const token = authHeader.split(' ')[1];
     
     // 3. Verifica e decodifica o token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string };
+    const decoded = jwt.verify(token, JWT_SECRET) as { id: string };
     
-    // 4. Busca o usuário SEM a senha
+    // 4. Busca o usuário
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
       select: {
@@ -43,13 +43,11 @@ const authMiddleware = async (req: AuthenticatedRequest, res: Response, next: Ne
     req.user = user;
     next();
   } catch (error) {
-    console.error('Erro na autenticação:', error); // Log detalhado
-    
-    if (error instanceof jwt.TokenExpiredError) {
-      return next(new ApiError(401, 'Token expirado'));
-    }
     if (error instanceof jwt.JsonWebTokenError) {
       return next(new ApiError(401, 'Token inválido'));
+    }
+    if (error instanceof jwt.TokenExpiredError) {
+      return next(new ApiError(401, 'Token expirado'));
     }
     next(error);
   }
