@@ -9,11 +9,11 @@ const router = Router();
 // Todas as rotas requerem autenticação
 router.use(authMiddleware);
 
-router.post("/", validate(createOrderSchema), OrderController.createOrder);
-router.get("/", OrderController.getUserOrders);
-router.get("/:id", OrderController.getOrder);
+router.post("/", authMiddleware, validate(createOrderSchema), OrderController.createOrder);
+router.get("/", authMiddleware, OrderController.getUserOrders);
+router.get("/:id", authMiddleware, OrderController.getOrder);
 
 // Apenas admin pode atualizar pedidos
-router.patch("/:id", validate(updateOrderSchema), OrderController.updateOrder);
+router.patch("/:id", authMiddleware, validate(updateOrderSchema), OrderController.updateOrder);
 
 export default router;

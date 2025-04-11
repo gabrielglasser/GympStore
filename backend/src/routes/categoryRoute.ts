@@ -1,7 +1,7 @@
 import { Router } from "express";
 import CategoryController from "../controllers/categoryController";
 import validate from "../middleware/validationMiddleware";
-// import authMiddleware from "../middleware/authMiddleware";
+import authMiddleware from "../middleware/authMiddleware";
 import {
   createCategorySchema,
   updateCategorySchema,
@@ -16,14 +16,14 @@ router.get("/:id", CategoryController.getCategoryById);
 // Rotas protegidas (requerem autenticação)
 router.post(
   "/",
-//   authMiddleware,
+  authMiddleware,
   validate(createCategorySchema),
   CategoryController.createCategory
 );
 
 router.put(
   "/:id",
-//   authMiddleware,
+  authMiddleware,
   validate(updateCategorySchema),
   CategoryController.updateCategory
 );

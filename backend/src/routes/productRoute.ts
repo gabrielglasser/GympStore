@@ -1,7 +1,7 @@
 import { Router } from "express";
 import ProductController from "../controllers/productController";
 import validate from "../middleware/validationMiddleware";
-// import authMiddleware from "../middleware/authMiddleware";
+import authMiddleware from "../middleware/authMiddleware";
 import {
   createProductSchema,
   updateProductSchema,
@@ -17,18 +17,18 @@ router.get("/category/:categoryId", ProductController.getProductsByCategory);
 // Rotas protegidas (requerem autenticação)
 router.post(
   "/",
-  // authMiddleware,
+  authMiddleware,
   validate(createProductSchema),
   ProductController.createProduct
 );
 
 router.put(
   "/:id",
-  // authMiddleware,
+  authMiddleware,
   validate(updateProductSchema),
   ProductController.updateProduct
 );
 
-router.delete("/:id", /*authMiddleware*/ ProductController.deleteProduct);
+router.delete("/:id", authMiddleware, ProductController.deleteProduct);
 
 export default router;

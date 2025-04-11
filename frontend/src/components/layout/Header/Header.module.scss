@@ -1,0 +1,80 @@
+@use '../../../assets/styles/variables.scss' as *;
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background-color: rgba($white, 0.98);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba($text-primary, 0.1);
+  
+  .container {
+    max-width: $breakpoint-xl;
+    margin: 0 auto;
+    padding: $spacing-4;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: $spacing-2;
+    font-size: $font-size-xl;
+    font-weight: 800;
+    color: $text-primary;
+    text-decoration: none;
+    letter-spacing: -0.5px;
+
+    &:hover {
+      color: $primary;
+    }
+  }
+
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: $spacing-8;
+
+    .link {
+      color: $text-primary;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: $font-size-base;
+      transition: $transition-base;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+
+      &:hover {
+        color: $primary;
+      }
+    }
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: $spacing-4;
+
+    .cartButton {
+      position: relative;
+      
+      .cartCount {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background-color: $primary;
+        color: $white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 600;
+      }
+    }
+  }
+}

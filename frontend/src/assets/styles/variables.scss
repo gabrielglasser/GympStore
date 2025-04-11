@@ -1,0 +1,47 @@
+// Colors
+$primary: #E31937; // Strong red for CTAs and important actions
+$primary-dark: #C41730;
+$secondary: #FFD700; // Gold for premium/special items
+$text-primary: #111111; // Near black for main text
+$text-secondary: #666666; // Medium gray for secondary text
+$background: #F5F5F5; // Light gray background
+$white: #ffffff;
+$error: #E31937; // Using primary red for errors
+$success: #1E5631; // Dark green for success states
+
+// Typography
+$font-family: 'Inter', system-ui, -apple-system, sans-serif;
+$font-size-base: 1rem;
+$font-size-sm: 0.875rem;
+$font-size-lg: 1.125rem;
+$font-size-xl: 1.25rem;
+$font-size-2xl: 1.5rem;
+
+// Spacing
+$spacing-1: 0.25rem;
+$spacing-2: 0.5rem;
+$spacing-3: 0.75rem;
+$spacing-4: 1rem;
+$spacing-6: 1.5rem;
+$spacing-8: 2rem;
+$spacing-12: 3rem;
+
+// Breakpoints
+$breakpoint-sm: 640px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 1024px;
+$breakpoint-xl: 1280px;
+
+// Border Radius
+$border-radius-sm: 0.25rem;
+$border-radius: 0.5rem;
+$border-radius-lg: 0.75rem;
+
+// Shadows
+$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+
+// Transitions
+$transition-base: all 0.15s ease-in-out;
+$transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

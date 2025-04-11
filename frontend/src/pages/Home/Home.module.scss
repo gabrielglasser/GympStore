@@ -1,0 +1,6 @@
+@use '../../assets/styles/variables.scss' as *;
+
+.home {
+  min-height: 100vh;
+  background-color: $background;
+}
