@@ -34,13 +34,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const removeFromCart = (productId: number) => {
-    setItems(current => current.filter(item => item.id !== productId));
+    setItems(current => current.filter(item => Number(item.id) !== productId));
   };
 
   const updateQuantity = (productId: number, quantity: number) => {
     setItems(current =>
       current.map(item =>
-        item.id === productId
+        Number(item.id) !== productId
           ? { ...item, quantity: Math.max(0, quantity) }
           : item
       )
