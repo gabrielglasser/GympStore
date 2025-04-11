@@ -4,11 +4,13 @@ import styles from './FeaturedProducts.module.scss';
 import { Product } from '../../../types';
 import { productService } from '../../../services/productService';
 import { useCart } from '../../../contexts/CartContext';
+import { ProductModal } from '../../ui/ProductModal/ProductModal';
 import toast from 'react-hot-toast';
 
 export const FeaturedProducts: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const { addToCart } = useCart();
 
   useEffect(() => {
@@ -37,6 +39,14 @@ export const FeaturedProducts: React.FC = () => {
     }
   };
 
+  const handleProductClick = (product: Product) => {
+    setSelectedProduct(product);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedProduct(null);
+  };
+
   if (loading) {
     return (
       <div className={styles.loading}>
@@ -52,7 +62,11 @@ export const FeaturedProducts: React.FC = () => {
       </div>
       <div className={styles.grid}>
         {products.map((product) => (
-          <div key={product.id} className={styles.card}>
+          <div 
+            key={product.id} 
+            className={styles.card}
+            onClick={() => handleProductClick(product)}
+          >
             <img 
               src={product.images[0]} 
               alt={product.name} 
@@ -66,7 +80,10 @@ export const FeaturedProducts: React.FC = () => {
               </div>
               <Button 
                 className={styles.addToCart}
-                onClick={() => handleAddToCart(product)}
+                onClick={(e) => {
+                  e.stopPropagation(); // Previne que o modal abra ao clicar no botão
+                  handleAddToCart(product);
+                }}
                 disabled={product.stock === 0}
               >
                 {product.stock > 0 ? 'Adicionar ao carrinho' : 'Produto indisponível'}
@@ -75,6 +92,14 @@ export const FeaturedProducts: React.FC = () => {
           </div>
         ))}
       </div>
+
+      {selectedProduct && (
+        <ProductModal
+          product={selectedProduct}
+          onClose={handleCloseModal}
+          onAddToCart={handleAddToCart}
+        />
+      )}
     </section>
   );
 };

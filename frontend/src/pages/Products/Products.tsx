@@ -4,6 +4,7 @@ import { Button } from '../../components/ui/Button/Button';
 import { useCart } from '../../contexts/CartContext';
 import { productService, categoryService } from '../../services/productService';
 import { Product } from '../../types';
+import { ProductModal } from '../../components/ui/ProductModal/ProductModal';
 import styles from './Products.module.scss';
 import toast from 'react-hot-toast';
 
@@ -13,6 +14,7 @@ const Products: React.FC = () => {
   const [categories, setCategories] = useState<Array<{ id: string; name: string; }>>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const { addToCart } = useCart();
 
   // Carregar categorias
@@ -76,6 +78,14 @@ const Products: React.FC = () => {
     setSearchTerm(e.target.value);
   };
 
+  const handleProductClick = (product: Product) => {
+    setSelectedProduct(product);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedProduct(null);
+  };
+
   if (loading) {
     return (
       <div className={styles.loading}>
@@ -117,7 +127,11 @@ const Products: React.FC = () => {
 
         <div className={styles.grid}>
           {filteredProducts.map((product) => (
-            <div key={product.id} className={styles.productCard}>
+            <div 
+              key={product.id} 
+              className={styles.productCard}
+              onClick={() => handleProductClick(product)}
+            >
               <img 
                 src={product.images[0]} 
                 alt={product.name} 
@@ -131,7 +145,10 @@ const Products: React.FC = () => {
                 </div>
                 <Button 
                   className={styles.addToCart}
-                  onClick={() => handleAddToCart(product)}
+                  onClick={(e) => {
+                    e.stopPropagation(); // Evita que o modal abra ao clicar no botão
+                    handleAddToCart(product);
+                  }}
                   disabled={product.stock === 0}
                 >
                   <ShoppingCart size={20} />
@@ -141,6 +158,14 @@ const Products: React.FC = () => {
             </div>
           ))}
         </div>
+
+        {selectedProduct && (
+          <ProductModal
+            product={selectedProduct}
+            onClose={handleCloseModal}
+            onAddToCart={handleAddToCart}
+          />
+        )}
       </div>
     </div>
   );
