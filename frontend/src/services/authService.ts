@@ -1,54 +1,62 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import api from './api';
 import Cookies from 'js-cookie';
-
-interface AuthResponse {
-  token: string;
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-  };
-}
-
-interface SignUpData {
-  name: string;
-  email: string;
-  password: string;
-}
+import toast from 'react-hot-toast';
 
 const TOKEN_KEY = '@GympStore:token';
 const USER_KEY = '@GympStore:user';
 
 export const authService = {
-  signIn: async (email: string, password: string): Promise<AuthResponse> => {
-    const response = await api.post<AuthResponse>('/auth/login', { email, password });
-    
-    if (response.data.token) {
-      Cookies.set(TOKEN_KEY, response.data.token, {
-        expires: 7,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax'
-      });
-      localStorage.setItem(USER_KEY, JSON.stringify(response.data.user));
+  signIn: async (email: string, password: string) => {
+    try {
+      const response = await api.post('/auth/login', { email, password });
+      
+      if (response.data.data.token) {
+        const { token, user } = response.data.data;
+        
+        // Salvando o token
+        Cookies.set(TOKEN_KEY, token, {
+          expires: 7,
+          secure: false, 
+          sameSite: 'lax'
+        });
+        
+        // Salvando usuário
+        localStorage.setItem(USER_KEY, JSON.stringify(user));
+        
+        toast.success('Login realizado com sucesso!');
+        return { token, user };
+      }
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Erro ao fazer login';
+      toast.error(message);
+      throw error;
     }
-
-    return response.data;
   },
 
-  signUp: async (data: SignUpData): Promise<AuthResponse> => {
-    const response = await api.post<AuthResponse>('/users', data);
-    
-    if (response.data.token) {
-      Cookies.set(TOKEN_KEY, response.data.token, {
-        expires: 7,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax'
-      });
-      localStorage.setItem(USER_KEY, JSON.stringify(response.data.user));
+  signUp: async (name: string, email: string, password: string) => {
+    try {
+      const response = await api.post('/users', { name, email, password });
+      
+      if (response.data.data.token) {
+        const { token, user } = response.data.data;
+        
+        Cookies.set(TOKEN_KEY, token, {
+          expires: 7,
+          secure: false,
+          sameSite: 'lax'
+        });
+        
+        localStorage.setItem(USER_KEY, JSON.stringify(user));
+        
+        toast.success('Cadastro realizado com sucesso!');
+        return { token, user };
+      }
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Erro ao fazer cadastro';
+      toast.error(message);
+      throw error;
     }
-
-    return response.data;
   },
 
   signOut: () => {

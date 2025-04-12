@@ -96,9 +96,9 @@ const Products: React.FC = () => {
     );
   }, [allProducts, searchTerm]);
 
-  const handleAddToCart = (product: Product) => {
+  const handleAddToCart = async (product: Product) => {
     try {
-      addToCart(product);
+      await addToCart(product.id, 1); 
       toast.success('Produto adicionado ao carrinho!');
     } catch (error) {
       console.error('Erro ao adicionar ao carrinho:', error);

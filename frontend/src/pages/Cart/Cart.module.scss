@@ -1,0 +1,226 @@
+@use '../../assets/styles/variables.scss' as *;
+
+.cart {
+  padding: $spacing-8 0;
+  min-height: calc(100vh - 80px);
+  background-color: $background;
+
+  .header {
+    margin-bottom: $spacing-8;
+    
+    h1 {
+      font-size: $font-size-2xl;
+      font-weight: 800;
+      color: $text-primary;
+    }
+  }
+
+  .content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: $spacing-8;
+
+    @media (max-width: $breakpoint-lg) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .items {
+    background: $white;
+    border-radius: $border-radius-lg;
+    padding: $spacing-6;
+    box-shadow: $shadow;
+  }
+
+  .item {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: $spacing-4;
+    padding: $spacing-4;
+    border-bottom: 1px solid rgba($text-primary, 0.1);
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    .image {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: $border-radius;
+    }
+
+    .info {
+      .title {
+        font-weight: 600;
+        color: $text-primary;
+        margin-bottom: $spacing-2;
+      }
+
+      .details {
+        color: $text-secondary;
+        font-size: $font-size-sm;
+      }
+
+      .price {
+        color: $primary;
+        font-weight: 700;
+        margin-top: $spacing-2;
+      }
+    }
+
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: $spacing-2;
+      align-items: flex-end;
+
+      .quantity {
+        display: flex;
+        align-items: center;
+        gap: $spacing-2;
+
+        button {
+          background: none;
+          border: 1px solid rgba($text-primary, 0.2);
+          width: 24px;
+          height: 24px;
+          border-radius: $border-radius-sm;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: $transition-base;
+
+          &:hover {
+            background-color: rgba($text-primary, 0.1);
+          }
+        }
+
+        span {
+          min-width: 40px;
+          text-align: center;
+          font-weight: 600;
+        }
+      }
+
+      .remove {
+        color: $error;
+        background: none;
+        border: none;
+        font-size: $font-size-sm;
+        cursor: pointer;
+        transition: $transition-base;
+
+        &:hover {
+          opacity: 0.8;
+        }
+      }
+    }
+  }
+
+  .summary {
+    background: $white;
+    border-radius: $border-radius-lg;
+    padding: $spacing-6;
+    box-shadow: $shadow;
+    height: fit-content;
+
+    h2 {
+      font-size: $font-size-xl;
+      font-weight: 700;
+      margin-bottom: $spacing-6;
+      padding-bottom: $spacing-4;
+      border-bottom: 1px solid rgba($text-primary, 0.1);
+    }
+
+    .summaryItem {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: $spacing-4;
+      color: $text-secondary;
+
+      &.total {
+        color: $text-primary;
+        font-weight: 700;
+        font-size: $font-size-lg;
+        margin-top: $spacing-4;
+        padding-top: $spacing-4;
+        border-top: 1px solid rgba($text-primary, 0.1);
+      }
+    }
+
+    .checkout {
+      margin-top: $spacing-6;
+      width: 100%;
+      padding: $spacing-4;
+      font-size: $font-size-lg;
+    }
+  }
+
+  .address {
+    margin-top: $spacing-6;
+    
+    h3 {
+      font-size: $font-size-lg;
+      font-weight: 700;
+      margin-bottom: $spacing-4;
+    }
+
+    .form {
+      display: grid;
+      gap: $spacing-4;
+
+      .formGroup {
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-2;
+
+        label {
+          font-weight: 600;
+          color: $text-primary;
+        }
+
+        input {
+          padding: $spacing-3;
+          border: 1px solid rgba($text-primary, 0.2);
+          border-radius: $border-radius;
+          transition: $transition-base;
+
+          &:focus {
+            border-color: $primary;
+            outline: none;
+          }
+        }
+      }
+
+      .row {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: $spacing-4;
+      }
+    }
+  }
+
+  .emptyCart {
+    text-align: center;
+    padding: $spacing-12;
+    color: $text-secondary;
+
+    .icon {
+      font-size: 48px;
+      margin-bottom: $spacing-4;
+      color: rgba($text-primary, 0.2);
+    }
+
+    h2 {
+      font-size: $font-size-xl;
+      font-weight: 700;
+      margin-bottom: $spacing-4;
+      color: $text-primary;
+    }
+
+    p {
+      margin-bottom: $spacing-6;
+    }
+  }
+}

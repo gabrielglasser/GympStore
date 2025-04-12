@@ -1,9 +1,11 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Home from '../pages/Home';
 import Products from '../pages/Products/Products';
 import Categories from '../pages/Categories/Categories';
 import Auth from '../pages/Auth/Auth';
+import Cart from '../pages/Cart/Cart';
+import { PrivateRoute } from '../components/PrivateRoute';
 
 export const AppRoutes: React.FC = () => {
   return (
@@ -11,7 +13,16 @@ export const AppRoutes: React.FC = () => {
       <Route path="/" element={<Home />} />
       <Route path="/produtos" element={<Products />} />
       <Route path="/categorias" element={<Categories />} />
-      <Route path="/login" element={<Auth />} />
+      <Route path="/auth" element={<Auth />} />
+      <Route 
+        path="/cart" 
+        element={
+          <PrivateRoute>
+            <Cart />
+          </PrivateRoute>
+        } 
+      />
+      <Route path="/carrinho" element={<Navigate to="/cart" replace />} />
     </Routes>
   );
 };

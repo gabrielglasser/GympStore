@@ -1,5 +1,5 @@
 import React, { useState, FormEvent } from 'react';
-import { Mail, Lock, User } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { Button } from '../../components/ui/Button/Button';
 import styles from './Auth.module.scss';
 import { useAuth } from '../../contexts/AuthContext';
@@ -9,6 +9,7 @@ const Auth: React.FC = () => {
   const { signIn, signUp } = useAuth();
   const [isSignUpMode, setIsSignUpMode] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [registerData, setRegisterData] = useState({ name: '', email: '', password: '' });
@@ -60,12 +61,23 @@ const Auth: React.FC = () => {
               <div className={styles.formGroup}>
                 <Lock className={styles.icon} size={20} />
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="Senha"
                   required
                   value={loginData.password}
                   onChange={e => setLoginData({ ...loginData, password: e.target.value })}
                 />
+                <button
+                  type="button"
+                  className={styles.togglePassword}
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff size={20} />
+                  ) : (
+                    <Eye size={20} />
+                  )}
+                </button>
               </div>
               <Button className={styles.submitButton} disabled={loading}>
                 {loading ? 'Entrando...' : 'Entrar'}

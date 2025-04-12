@@ -33,3 +33,25 @@ export interface Category {
   products: Product[];
   createdAt: string;
 }
+
+export interface CartItem {
+  id: string;
+  quantity: number;
+  product: {
+    id: string;
+    name: string;
+    price: number;
+    images: string[];
+    flavor: string | null;
+    stock: number;
+  };
+}
+
+export interface Cart {
+  id: string;
+  userId: string;
+  items: CartItem[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
