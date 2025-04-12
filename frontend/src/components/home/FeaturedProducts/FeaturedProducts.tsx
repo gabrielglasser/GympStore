@@ -31,7 +31,7 @@ export const FeaturedProducts: React.FC = () => {
 
   const handleAddToCart = (product: Product) => {
     try {
-      addToCart(product);
+      addToCart(product.id, 1);
       toast.success('Produto adicionado ao carrinho!');
     } catch (error) {
       console.error('Erro ao adicionar ao carrinho:', error);

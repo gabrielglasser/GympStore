@@ -1,53 +1,89 @@
 @use '../../../assets/styles/variables.scss' as *;
 
 .header {
+  background-color: $white;
+  box-shadow: $shadow;
   position: sticky;
   top: 0;
-  z-index: 50;
-  background-color: rgba($white, 0.98);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid rgba($text-primary, 0.1);
-  
+  z-index: 1000;
+
   .container {
-    max-width: $breakpoint-xl;
+    max-width: 1200px;
     margin: 0 auto;
     padding: $spacing-4;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    position: relative;
   }
 
   .logo {
     display: flex;
     align-items: center;
     gap: $spacing-2;
-    font-size: $font-size-xl;
-    font-weight: 800;
-    color: $text-primary;
+    color: $primary;
+    font-weight: 700;
+    font-size: $font-size-lg;
     text-decoration: none;
-    letter-spacing: -0.5px;
-
+    
     &:hover {
-      color: $primary;
+      opacity: 0.8;
+    }
+  }
+
+  .menuButton {
+    display: none;
+    background: none;
+    border: none;
+    color: $text-primary;
+    cursor: pointer;
+    padding: $spacing-2;
+
+    @media (max-width: $breakpoint-md) {
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
   }
 
   .nav {
     display: flex;
-    align-items: center;
-    gap: $spacing-8;
+    gap: $spacing-6;
 
     .link {
       color: $text-primary;
       text-decoration: none;
-      font-weight: 600;
-      font-size: $font-size-base;
+      font-weight: 500;
       transition: $transition-base;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
 
       &:hover {
         color: $primary;
+      }
+    }
+
+    @media (max-width: $breakpoint-md) {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: $white;
+      flex-direction: column;
+      padding: $spacing-4;
+      gap: $spacing-4;
+      box-shadow: $shadow;
+
+      &.active {
+        display: flex;
+      }
+
+      .link {
+        padding: $spacing-2;
+        border-radius: $border-radius;
+
+        &:hover {
+          background-color: rgba($primary, 0.1);
+        }
       }
     }
   }
@@ -58,22 +94,58 @@
     gap: $spacing-4;
 
     .cartButton {
-      position: relative;
-      
-      .cartCount {
-        position: absolute;
-        top: -8px;
-        right: -8px;
-        background-color: $primary;
-        color: $white;
-        border-radius: 50%;
-        width: 20px;
-        height: 20px;
+      text-decoration: none;
+    }
+
+    .cartCount {
+      background-color: $primary;
+      color: $white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: $font-size-sm;
+      margin-left: $spacing-2;
+    }
+
+    .userName {
+      color: $text-primary;
+      font-weight: 500;
+    }
+
+    .logoutButton {
+      display: flex;
+      align-items: center;
+      gap: $spacing-2;
+      background: none;
+      border: none;
+      color: $error;
+      cursor: pointer;
+      padding: $spacing-2;
+      border-radius: $border-radius;
+      transition: $transition-base;
+
+      &:hover {
+        background-color: rgba($error, 0.1);
+      }
+    }
+
+    @media (max-width: $breakpoint-md) {
+      display: none;
+      flex-direction: column;
+      width: 100%;
+      padding: $spacing-4;
+      background: $white;
+      box-shadow: $shadow;
+
+      &.active {
         display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 12px;
-        font-weight: 600;
+      }
+
+      .buttonText {
+        display: inline;
       }
     }
   }
