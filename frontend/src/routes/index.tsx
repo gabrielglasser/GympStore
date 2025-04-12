@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import Home from '../pages/Home';
 import Products from '../pages/Products/Products';
 import Categories from '../pages/Categories/Categories';
+import Auth from '../pages/Auth/Auth';
 
 export const AppRoutes: React.FC = () => {
   return (
@@ -10,6 +11,7 @@ export const AppRoutes: React.FC = () => {
       <Route path="/" element={<Home />} />
       <Route path="/produtos" element={<Products />} />
       <Route path="/categorias" element={<Categories />} />
+      <Route path="/login" element={<Auth />} />
     </Routes>
   );
 };

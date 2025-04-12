@@ -1,0 +1,353 @@
+@use '../../assets/styles/variables.scss' as *;
+
+.auth {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: $background;
+  padding: $spacing-4;
+
+  .container {
+    position: relative;
+    width: 100%;
+    max-width: 1000px;
+    min-height: 600px;
+    background: $white;
+    border-radius: $border-radius-lg;
+    box-shadow: $shadow-lg;
+    overflow: hidden;
+  }
+
+  .formsContainer {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+  }
+
+  .signInSignUp {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    transition: transform 0.6s ease-in-out;
+
+    &.signUpMode {
+      transform: translateX(-50%);
+
+      .signInForm {
+        opacity: 0;
+        z-index: 1;
+        transform: translateX(-100%);
+      }
+
+      .signUpForm {
+        opacity: 1;
+        z-index: 2;
+        transform: translateX(100%);
+      }
+    }
+  }
+
+  .form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: $spacing-8;
+    width: 50%;
+    transition: all 0.6s ease-in-out;
+
+    &.signInForm {
+      opacity: 1;
+      z-index: 2;
+    }
+
+    &.signUpForm {
+      opacity: 0;
+      z-index: 1;
+    }
+
+    h2 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: $text-primary;
+      margin-bottom: $spacing-8;
+      text-transform: uppercase;
+      letter-spacing: -1px;
+    }
+
+    .formGroup {
+      position: relative;
+      width: 100%;
+      max-width: 380px;
+      margin-bottom: $spacing-4;
+
+      input {
+        width: 100%;
+        padding: $spacing-4;
+        padding-left: $spacing-12;
+        border: 2px solid rgba($text-primary, 0.1);
+        border-radius: $border-radius;
+        font-size: $font-size-base;
+        transition: $transition-base;
+        background-color: rgba($text-primary, 0.02);
+
+        &:focus {
+          border-color: $primary;
+          outline: none;
+          background-color: $white;
+        }
+      }
+
+      .icon {
+        position: absolute;
+        left: $spacing-4;
+        top: 50%;
+        transform: translateY(-50%);
+        color: $text-secondary;
+      }
+    }
+
+    .submitButton {
+      width: 100%;
+      max-width: 380px;
+      margin-top: $spacing-4;
+      padding: $spacing-4;
+      font-size: $font-size-lg;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 700;
+    }
+  }
+
+  .overlayContainer {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 50%;
+    height: 100%;
+    overflow: hidden;
+    transition: transform 0.6s ease-in-out;
+    z-index: 100;
+
+    &.signUpMode {
+      transform: translateX(-100%);
+    }
+  }
+
+  .overlay {
+    background: linear-gradient(45deg, $primary-dark, $primary);
+    position: relative;
+    left: -100%;
+    height: 100%;
+    width: 200%;
+    transform: translateX(0);
+    transition: transform 0.6s ease-in-out;
+
+    &.signUpMode {
+      transform: translateX(50%);
+    }
+  }
+
+  .panel {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: $spacing-8;
+    text-align: center;
+    top: 0;
+    height: 100%;
+    width: 50%;
+    transform: translateX(0);
+    transition: transform 0.6s ease-in-out;
+
+    &.leftPanel {
+      transform: translateX(-20%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    &.rightPanel {
+      right: 0;
+      transform: translateX(0);
+      opacity: 1;
+      pointer-events: all;
+    }
+  }
+
+  &.signUpMode {
+    .leftPanel {
+      transform: translateX(0);
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .rightPanel {
+      transform: translateX(20%);
+      opacity: 0;
+      pointer-events: none;
+    }
+  }
+
+  .content {
+    color: $white;
+    transition: transform 0.6s ease-in-out;
+    transition-delay: 0.1s;
+
+    h3 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: $spacing-4;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    p {
+      font-size: $font-size-lg;
+      margin-bottom: $spacing-8;
+      opacity: 0.9;
+      line-height: 1.6;
+      max-width: 480px;
+    }
+
+    button {
+      background-color: transparent;
+      border: 2px solid $white;
+      color: $white;
+      padding: $spacing-3 $spacing-8;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+
+      &:hover {
+        background-color: $white;
+        color: $primary;
+      }
+    }
+  }
+}
+
+@media (max-width: $breakpoint-md) {
+  .auth {
+    padding: $spacing-2;
+
+    .container {
+      min-height: auto;
+      max-width: 480px;
+      margin: $spacing-4;
+    }
+
+    .signInSignUp {
+      position: relative;
+      flex-direction: column;
+      min-height: 600px;
+
+      &.signUpMode {
+        transform: none;
+
+        .signInForm {
+          display: none;
+        }
+
+        .signUpForm {
+          display: flex;
+          opacity: 1;
+          transform: none;
+        }
+      }
+    }
+
+    .form {
+      width: 100%;
+      padding: $spacing-6;
+
+      &.signUpForm {
+        display: none;
+      }
+
+      h2 {
+        font-size: 2rem;
+      }
+    }
+
+    .overlayContainer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      top: auto;
+      width: 100%;
+      height: auto;
+      padding: $spacing-4;
+      background: linear-gradient(45deg, $primary-dark, $primary);
+      transform: none;
+
+      &.signUpMode {
+        transform: none;
+      }
+    }
+
+    .overlay {
+      position: static;
+      width: 100%;
+      transform: none;
+      background: none;
+
+      &.signUpMode {
+        transform: none;
+      }
+    }
+
+    .panel {
+      position: static;
+      width: 100%;
+      padding: $spacing-4;
+      transform: none;
+      opacity: 1;
+
+      &.leftPanel,
+      &.rightPanel {
+        display: none;
+      }
+
+      &.leftPanel {
+        display: none;
+      }
+
+      &.rightPanel {
+        display: block;
+      }
+    }
+
+    &.signUpMode {
+      .leftPanel {
+        display: block;
+      }
+
+      .rightPanel {
+        display: none;
+      }
+    }
+
+    .content {
+      h3 {
+        font-size: 1.5rem;
+        margin-bottom: $spacing-2;
+      }
+
+      p {
+        font-size: $font-size-base;
+        margin-bottom: $spacing-4;
+      }
+    }
+  }
+}
