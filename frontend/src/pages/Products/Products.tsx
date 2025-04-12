@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Search, ShoppingCart } from 'lucide-react';
 import { Button } from '../../components/ui/Button/Button';
 import { useCart } from '../../contexts/CartContext';
@@ -9,39 +10,58 @@ import styles from './Products.module.scss';
 import toast from 'react-hot-toast';
 
 const Products: React.FC = () => {
-  const [allProducts, setAllProducts] = useState<Product[]>([]); // Armazena todos os produtos
+  const [searchParams, setSearchParams] = useSearchParams();
+  const categorySlug = searchParams.get('categoria');
+
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [categories, setCategories] = useState<Array<{ id: string; name: string; }>>([]);
+  const [categories, setCategories] = useState<Array<{ id: string; name: string; slug: string }>>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const { addToCart } = useCart();
 
-  // Carregar categorias
+  // Carregar categorias e definir categoria selecionada
   useEffect(() => {
     const loadCategories = async () => {
       try {
         const data = await categoryService.getAll();
-        setCategories([{ id: '', name: 'Todos' }, ...data]);
+        setCategories([{ id: '', name: 'Todos', slug: '' }, ...data]);
+        
+        if (categorySlug) {
+          const category = data.find((cat: { slug: string; }) => cat.slug === categorySlug);
+          if (category) {
+            setSelectedCategory(category.id);
+          } else {
+            setSelectedCategory('');
+          }
+        } else {
+          setSelectedCategory('');
+        }
       } catch (error) {
         console.error('Erro ao carregar categorias:', error);
         toast.error('Erro ao carregar categorias');
       }
     };
-    loadCategories();
-  }, []);
 
-  // Carregar produtos
+    loadCategories();
+  }, [categorySlug]);
+
+  // Carregar produtos com base na categoria selecionada
   useEffect(() => {
     const loadProducts = async () => {
       try {
         setLoading(true);
         let data;
-        if (selectedCategory && selectedCategory !== 'Todos') {
+        
+        if (selectedCategory) {
+          console.log('Buscando produtos da categoria:', selectedCategory);
           data = await productService.getByCategory(selectedCategory);
         } else {
+          console.log('Buscando todos os produtos');
           data = await productService.getAll();
         }
+        
         setAllProducts(data);
       } catch (error) {
         console.error('Erro ao carregar produtos:', error);
@@ -54,7 +74,19 @@ const Products: React.FC = () => {
     loadProducts();
   }, [selectedCategory]);
 
-  // Filtrar produtos baseado na pesquisa
+  // Atualizar URL e categoria selecionada
+  const handleCategoryChange = (categoryId: string) => {
+    const category = categories.find(cat => cat.id === categoryId);
+    setSelectedCategory(categoryId);
+    
+    if (category && category.slug) {
+      setSearchParams({ categoria: category.slug });
+    } else {
+      setSearchParams({});
+    }
+  };
+
+  // Filtrar produtos com base na pesquisa
   const filteredProducts = useMemo(() => {
     const searchTermLower = searchTerm.toLowerCase();
     return allProducts.filter(product => 
@@ -117,7 +149,7 @@ const Products: React.FC = () => {
               <button
                 key={category.id}
                 className={`${selectedCategory === category.id ? styles.active : ''}`}
-                onClick={() => setSelectedCategory(category.id)}
+                onClick={() => handleCategoryChange(category.id)}
               >
                 {category.name}
               </button>

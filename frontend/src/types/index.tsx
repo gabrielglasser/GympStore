@@ -24,3 +24,12 @@ export interface User {
   name: string;
   role: 'USER' | 'ADMIN';
 }
+
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  image: string;
+  products: Product[];
+  createdAt: string;
+}

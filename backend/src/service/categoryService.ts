@@ -33,7 +33,6 @@ class CategoryService {
   }
 
   async createCategory(input: CreateCategoryInput): Promise<CategoryWithProducts> {
-    // Verifica se o slug já existe
     const slugExists = await prisma.category.findUnique({
       where: { slug: input.slug },
     });
@@ -43,7 +42,11 @@ class CategoryService {
     }
 
     return await prisma.category.create({
-      data: input,
+      data: {
+        name: input.name,
+        slug: input.slug,
+        image: input.image
+      },
       include: {
         products: true,
       },
@@ -59,7 +62,6 @@ class CategoryService {
       throw new ApiError(404, "Categoria não encontrada");
     }
 
-    // Verifica se o novo slug já existe (se foi alterado)
     if (input.slug && input.slug !== categoryExists.slug) {
       const slugExists = await prisma.category.findUnique({
         where: { slug: input.slug },
@@ -72,7 +74,11 @@ class CategoryService {
 
     return await prisma.category.update({
       where: { id: input.id },
-      data: input,
+      data: {
+        name: input.name,
+        slug: input.slug,
+        image: input.image
+      },
       include: {
         products: true,
       },
@@ -88,7 +94,6 @@ class CategoryService {
       throw new ApiError(404, "Categoria não encontrada");
     }
 
-    // Verifica se a categoria tem produtos associados
     const productsCount = await prisma.product.count({
       where: { categoryId: id },
     });

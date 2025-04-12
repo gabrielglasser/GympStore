@@ -5,10 +5,11 @@ const categorySchema = z.object({
   slug: z.string()
     .min(3, "Slug deve ter pelo menos 3 caracteres")
     .regex(/^[a-z0-9-]+$/, "Slug deve conter apenas letras minúsculas, números e hífens"),
+  image: z.string().url("URL da imagem inválida")
 });
 
 export const createCategorySchema = categorySchema;
-export const updateCategorySchema = categorySchema.extend({
+export const updateCategorySchema = categorySchema.partial().extend({
   id: z.string().uuid("ID da categoria deve ser um UUID válido"),
 });
 

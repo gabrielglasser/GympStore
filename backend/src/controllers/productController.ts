@@ -34,7 +34,8 @@ class ProductController {
   }
 
   async getProductsByCategory(req: Request, res: Response) {
-    const products = await ProductService.getProductsByCategory(req.params.categoryId);
+    const categoryId = req.params.categoryId;
+    const products = await ProductService.getProductsByCategory(categoryId);
     ApiResponse.success(res, products);
   }
 }

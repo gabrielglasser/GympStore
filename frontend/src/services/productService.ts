@@ -15,6 +15,9 @@ export const productService = {
   },
 
   getByCategory: async (categoryId: string): Promise<Product[]> => {
+    if (!categoryId) {
+      throw new Error('CategoryId é obrigatório');
+    }
     const response = await api.get(`/products/category/${categoryId}`);
     return response.data.data;
   },

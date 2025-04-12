@@ -9,6 +9,7 @@ export type CategoryWithProducts = Prisma.CategoryGetPayload<{
 export interface CreateCategoryInput {
   name: string;
   slug: string;
+  image: string;
 }
 
 export interface UpdateCategoryInput extends Partial<CreateCategoryInput> {

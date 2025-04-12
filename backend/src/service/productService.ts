@@ -92,12 +92,29 @@ class ProductService {
   }
 
   async getProductsByCategory(categoryId: string): Promise<ProductWithCategory[]> {
+    if (!categoryId) {
+      throw new ApiError(400, "ID da categoria é obrigatório");
+    }
+
+    const categoryExists = await prisma.category.findUnique({
+      where: { id: categoryId }
+    });
+
+    if (!categoryExists) {
+      throw new ApiError(404, "Categoria não encontrada");
+    }
+
     return await prisma.product.findMany({
-      where: { categoryId },
+      where: {
+        categoryId: categoryId
+      },
       include: {
         category: true,
         reviews: true,
       },
+      orderBy: {
+        createdAt: "desc"
+      }
     });
   }
 }
