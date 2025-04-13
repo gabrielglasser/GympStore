@@ -24,14 +24,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      loadCart();
-    } else {
-      setItems([]);
-    }
-  }, [isAuthenticated]);
-
   const loadCart = async () => {
     try {
       setLoading(true);
@@ -39,11 +31,18 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setItems(cart.items);
     } catch (error) {
       console.error('Erro ao carregar carrinho:', error);
-      toast.error('Erro ao carregar carrinho');
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadCart();
+    } else {
+      setItems([]);
+    }
+  }, [isAuthenticated]);
 
   const addToCart = async (productId: string, quantity: number) => {
     if (!isAuthenticated) {
@@ -67,14 +66,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const updateQuantity = async (itemId: string, quantity: number) => {
+    if (quantity === 0) {
+      return removeFromCart(itemId);
+    }
+
     try {
       setLoading(true);
-      if (quantity === 0) {
-        await removeFromCart(itemId);
-      } else {
-        const cart = await cartService.updateCartItem(itemId, quantity);
-        setItems(cart.items);
-      }
+      const cart = await cartService.updateCartItem(itemId, quantity);
+      setItems(cart.items);
     } catch (error) {
       console.error('Erro ao atualizar quantidade:', error);
       toast.error('Erro ao atualizar quantidade');

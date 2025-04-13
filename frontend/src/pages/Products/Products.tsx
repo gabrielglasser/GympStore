@@ -98,11 +98,9 @@ const Products: React.FC = () => {
 
   const handleAddToCart = async (product: Product) => {
     try {
-      await addToCart(product.id, 1); 
-      toast.success('Produto adicionado ao carrinho!');
+      await addToCart(product.id, 1);
     } catch (error) {
       console.error('Erro ao adicionar ao carrinho:', error);
-      toast.error('Erro ao adicionar ao carrinho');
     }
   };
 

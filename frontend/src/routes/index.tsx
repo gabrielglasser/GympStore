@@ -6,6 +6,7 @@ import Categories from '../pages/Categories/Categories';
 import Auth from '../pages/Auth/Auth';
 import Cart from '../pages/Cart/Cart';
 import { PrivateRoute } from '../components/PrivateRoute';
+import About from '../pages/About/About';
 
 export const AppRoutes: React.FC = () => {
   return (
@@ -23,6 +24,8 @@ export const AppRoutes: React.FC = () => {
         } 
       />
       <Route path="/carrinho" element={<Navigate to="/cart" replace />} />
+      <Route path="/sobre" element={<About />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 };

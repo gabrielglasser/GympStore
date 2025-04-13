@@ -29,7 +29,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signIn = useCallback(async (email: string, password: string) => {
     try {
       const response = await authService.signIn(email, password);
-      setUser(response.user);
+      if (response) {
+        setUser(response.user);
+      }
       toast.success('Login realizado com sucesso!');
       navigate('/');
     } catch (error: any) {
@@ -40,8 +42,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signUp = useCallback(async (name: string, email: string, password: string) => {
     try {
-      const response = await authService.signUp({ name, email, password });
-      setUser(response.user);
+      const response = await authService.signUp(name, email, password);
+      if (response?.user) {
+        setUser(response.user);
+      }
       toast.success('Cadastro realizado com sucesso!');
       navigate('/');
     } catch (error: any) {
