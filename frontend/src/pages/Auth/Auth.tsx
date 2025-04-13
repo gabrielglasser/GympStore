@@ -4,15 +4,20 @@ import { Button } from '../../components/ui/Button/Button';
 import styles from './Auth.module.scss';
 import { useAuth } from '../../contexts/AuthContext';
 
-
 const Auth: React.FC = () => {
   const { signIn, signUp } = useAuth();
   const [isSignUpMode, setIsSignUpMode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [loginData, setLoginData] = useState({ email: '', password: '' });
-  const [registerData, setRegisterData] = useState({ name: '', email: '', password: '' });
+  const [registerData, setRegisterData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
 
   const handleSignIn = async (e: FormEvent) => {
     e.preventDefault();
@@ -28,6 +33,10 @@ const Auth: React.FC = () => {
 
   const handleSignUp = async (e: FormEvent) => {
     e.preventDefault();
+    if (registerData.password !== registerData.confirmPassword) {
+      console.error('As senhas não coincidem');
+      return;
+    }
     try {
       setLoading(true);
       await signUp(registerData.name, registerData.email, registerData.password);
@@ -38,7 +47,13 @@ const Auth: React.FC = () => {
     }
   };
 
-  const toggleMode = () => setIsSignUpMode(!isSignUpMode);
+  const toggleMode = () => {
+    setIsSignUpMode(!isSignUpMode);
+    setShowPassword(false);
+    setShowConfirmPassword(false);
+    setLoginData({ email: '', password: '' });
+    setRegisterData({ name: '', email: '', password: '', confirmPassword: '' });
+  };
 
   return (
     <div className={`${styles.auth} ${isSignUpMode ? styles.signUpMode : ''}`}>
@@ -72,11 +87,7 @@ const Auth: React.FC = () => {
                   className={styles.togglePassword}
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? (
-                    <EyeOff size={20} />
-                  ) : (
-                    <Eye size={20} />
-                  )}
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
               <Button className={styles.submitButton} disabled={loading}>
@@ -110,12 +121,36 @@ const Auth: React.FC = () => {
               <div className={styles.formGroup}>
                 <Lock className={styles.icon} size={20} />
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="Senha"
                   required
                   value={registerData.password}
                   onChange={e => setRegisterData({ ...registerData, password: e.target.value })}
                 />
+                <button
+                  type="button"
+                  className={styles.togglePassword}
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+              <div className={styles.formGroup}>
+                <Lock className={styles.icon} size={20} />
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Confirmar Senha"
+                  required
+                  value={registerData.confirmPassword}
+                  onChange={e => setRegisterData({ ...registerData, confirmPassword: e.target.value })}
+                />
+                <button
+                  type="button"
+                  className={styles.togglePassword}
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
               </div>
               <Button className={styles.submitButton} disabled={loading}>
                 {loading ? 'Cadastrando...' : 'Cadastrar'}

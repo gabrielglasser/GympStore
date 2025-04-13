@@ -8,6 +8,10 @@
   background-color: $background;
   padding: $spacing-4;
 
+  @media (max-width: $breakpoint-sm) {
+    padding: $spacing-2;
+  }
+
   .container {
     position: relative;
     width: 100%;
@@ -17,6 +21,17 @@
     border-radius: $border-radius-lg;
     box-shadow: $shadow-lg;
     overflow: hidden;
+
+    @media (max-width: $breakpoint-md) {
+      min-height: 500px;
+      margin: $spacing-2;
+    }
+
+    @media (max-width: $breakpoint-sm) {
+      min-height: 450px;
+      margin: 0;
+      border-radius: $border-radius;
+    }
   }
 
   .formsContainer {
@@ -42,16 +57,30 @@
     &.signUpMode {
       transform: translateX(-50%);
 
+      @media (max-width: $breakpoint-md) {
+        transform: translateX(0);
+      }
+
       .signInForm {
         opacity: 0;
         z-index: 1;
         transform: translateX(-100%);
+
+        @media (max-width: $breakpoint-md) {
+          transform: translateX(0);
+          display: none;
+        }
       }
 
       .signUpForm {
         opacity: 1;
         z-index: 2;
         transform: translateX(100%);
+
+        @media (max-width: $breakpoint-md) {
+          transform: translateX(0);
+          display: flex;
+        }
       }
     }
   }
@@ -64,6 +93,15 @@
     width: 50%;
     transition: all 0.6s ease-in-out;
 
+    @media (max-width: $breakpoint-md) {
+      width: 100%;
+      padding: $spacing-6;
+    }
+
+    @media (max-width: $breakpoint-sm) {
+      padding: $spacing-4;
+    }
+
     &.signInForm {
       opacity: 1;
       z-index: 2;
@@ -72,6 +110,10 @@
     &.signUpForm {
       opacity: 0;
       z-index: 1;
+
+      @media (max-width: $breakpoint-md) {
+        display: none;
+      }
     }
 
     h2 {
@@ -81,6 +123,16 @@
       margin-bottom: $spacing-8;
       text-transform: uppercase;
       letter-spacing: -1px;
+
+      @media (max-width: $breakpoint-md) {
+        font-size: 2rem;
+        margin-bottom: $spacing-6;
+      }
+
+      @media (max-width: $breakpoint-sm) {
+        font-size: 1.75rem;
+        margin-bottom: $spacing-4;
+      }
     }
 
     .formGroup {
@@ -89,15 +141,23 @@
       max-width: 380px;
       margin-bottom: $spacing-4;
 
+      @media (max-width: $breakpoint-sm) {
+        margin-bottom: $spacing-3;
+      }
+
       input {
         width: 100%;
-        padding: $spacing-4;
-        padding-left: $spacing-12;
+        padding: $spacing-4 $spacing-12;
         border: 2px solid rgba($text-primary, 0.1);
         border-radius: $border-radius;
         font-size: $font-size-base;
         transition: $transition-base;
         background-color: rgba($text-primary, 0.02);
+
+        @media (max-width: $breakpoint-sm) {
+          padding: $spacing-3 $spacing-12;
+          font-size: $font-size-sm;
+        }
 
         &:focus {
           border-color: $primary;
@@ -112,20 +172,33 @@
         top: 50%;
         transform: translateY(-50%);
         color: $text-secondary;
+
+        @media (max-width: $breakpoint-sm) {
+          left: $spacing-3;
+        }
       }
 
       .togglePassword {
         position: absolute;
-        right: 1rem;
+        right: $spacing-4;
         top: 50%;
         transform: translateY(-50%);
         background: none;
         border: none;
         cursor: pointer;
-        color: #666;
+        color: $text-secondary;
+        padding: $spacing-2;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: $transition-base;
 
         &:hover {
-          color: #333;
+          color: $text-primary;
+        }
+
+        @media (max-width: $breakpoint-sm) {
+          right: $spacing-3;
         }
       }
     }
@@ -139,6 +212,12 @@
       text-transform: uppercase;
       letter-spacing: 1px;
       font-weight: 700;
+
+      @media (max-width: $breakpoint-sm) {
+        padding: $spacing-3;
+        font-size: $font-size-base;
+        margin-top: $spacing-3;
+      }
     }
   }
 
@@ -152,8 +231,22 @@
     transition: transform 0.6s ease-in-out;
     z-index: 100;
 
+    @media (max-width: $breakpoint-md) {
+      position: fixed;
+      top: auto;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: auto;
+      background: linear-gradient(45deg, $primary-dark, $primary);
+    }
+
     &.signUpMode {
       transform: translateX(-100%);
+
+      @media (max-width: $breakpoint-md) {
+        transform: none;
+      }
     }
   }
 
@@ -166,8 +259,19 @@
     transform: translateX(0);
     transition: transform 0.6s ease-in-out;
 
+    @media (max-width: $breakpoint-md) {
+      position: static;
+      width: 100%;
+      transform: none;
+      background: none;
+    }
+
     &.signUpMode {
       transform: translateX(50%);
+
+      @media (max-width: $breakpoint-md) {
+        transform: none;
+      }
     }
   }
 
@@ -185,10 +289,21 @@
     transform: translateX(0);
     transition: transform 0.6s ease-in-out;
 
+    @media (max-width: $breakpoint-md) {
+      position: static;
+      width: 100%;
+      height: auto;
+      padding: $spacing-4;
+    }
+
     &.leftPanel {
       transform: translateX(-20%);
       opacity: 0;
       pointer-events: none;
+
+      @media (max-width: $breakpoint-md) {
+        display: none;
+      }
     }
 
     &.rightPanel {
@@ -196,6 +311,10 @@
       transform: translateX(0);
       opacity: 1;
       pointer-events: all;
+
+      @media (max-width: $breakpoint-md) {
+        transform: none;
+      }
     }
   }
 
@@ -204,12 +323,20 @@
       transform: translateX(0);
       opacity: 1;
       pointer-events: all;
+
+      @media (max-width: $breakpoint-md) {
+        display: block;
+      }
     }
 
     .rightPanel {
       transform: translateX(20%);
       opacity: 0;
       pointer-events: none;
+
+      @media (max-width: $breakpoint-md) {
+        display: none;
+      }
     }
   }
 
@@ -224,6 +351,15 @@
       margin-bottom: $spacing-4;
       text-transform: uppercase;
       letter-spacing: 1px;
+
+      @media (max-width: $breakpoint-md) {
+        font-size: 1.5rem;
+        margin-bottom: $spacing-2;
+      }
+
+      @media (max-width: $breakpoint-sm) {
+        font-size: 1.25rem;
+      }
     }
 
     p {
@@ -232,6 +368,16 @@
       opacity: 0.9;
       line-height: 1.6;
       max-width: 480px;
+
+      @media (max-width: $breakpoint-md) {
+        font-size: $font-size-base;
+        margin-bottom: $spacing-4;
+      }
+
+      @media (max-width: $breakpoint-sm) {
+        font-size: $font-size-sm;
+        margin-bottom: $spacing-3;
+      }
     }
 
     button {
@@ -242,126 +388,16 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 1px;
+      transition: $transition-base;
+
+      @media (max-width: $breakpoint-sm) {
+        padding: $spacing-2 $spacing-6;
+        font-size: $font-size-sm;
+      }
 
       &:hover {
         background-color: $white;
         color: $primary;
-      }
-    }
-  }
-}
-
-@media (max-width: $breakpoint-md) {
-  .auth {
-    padding: $spacing-2;
-
-    .container {
-      min-height: auto;
-      max-width: 480px;
-      margin: $spacing-4;
-    }
-
-    .signInSignUp {
-      position: relative;
-      flex-direction: column;
-      min-height: 600px;
-
-      &.signUpMode {
-        transform: none;
-
-        .signInForm {
-          display: none;
-        }
-
-        .signUpForm {
-          display: flex;
-          opacity: 1;
-          transform: none;
-        }
-      }
-    }
-
-    .form {
-      width: 100%;
-      padding: $spacing-6;
-
-      &.signUpForm {
-        display: none;
-      }
-
-      h2 {
-        font-size: 2rem;
-      }
-    }
-
-    .overlayContainer {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      top: auto;
-      width: 100%;
-      height: auto;
-      padding: $spacing-4;
-      background: linear-gradient(45deg, $primary-dark, $primary);
-      transform: none;
-
-      &.signUpMode {
-        transform: none;
-      }
-    }
-
-    .overlay {
-      position: static;
-      width: 100%;
-      transform: none;
-      background: none;
-
-      &.signUpMode {
-        transform: none;
-      }
-    }
-
-    .panel {
-      position: static;
-      width: 100%;
-      padding: $spacing-4;
-      transform: none;
-      opacity: 1;
-
-      &.leftPanel,
-      &.rightPanel {
-        display: none;
-      }
-
-      &.leftPanel {
-        display: none;
-      }
-
-      &.rightPanel {
-        display: block;
-      }
-    }
-
-    &.signUpMode {
-      .leftPanel {
-        display: block;
-      }
-
-      .rightPanel {
-        display: none;
-      }
-    }
-
-    .content {
-      h3 {
-        font-size: 1.5rem;
-        margin-bottom: $spacing-2;
-      }
-
-      p {
-        font-size: $font-size-base;
-        margin-bottom: $spacing-4;
       }
     }
   }
