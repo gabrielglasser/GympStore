@@ -38,6 +38,7 @@ export interface CartItem {
   id: string;
   quantity: number;
   product: {
+    [x: string]: number;
     id: string;
     name: string;
     price: number;

@@ -13,6 +13,7 @@
     "@types/js-cookie": "^3.0.6",
     "@types/lodash.debounce": "^4.0.9",
     "axios": "^1.8.4",
+    "fast-xml-parser": "^5.2.0",
     "js-cookie": "^3.0.5",
     "lodash.debounce": "^4.0.8",
     "lucide-react": "^0.487.0",
