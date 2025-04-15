@@ -57,41 +57,49 @@ export interface Cart {
 
 export interface Address {
   id?: string;
-  cep: string;
   street: string;
-  number: string;
-  complement: string;
-  neighborhood: string;
   city: string;
   state: string;
+  postalCode: string;
+  country?: string;
+  isDefault?: boolean;
+  createdAt?: Date;
 }
 
 export type PaymentMethod = 'CREDIT_CARD' | 'DEBIT_CARD' | 'PIX' | 'BOLETO';
 
-export interface PaymentData {
+export type PaymentData = {
   method: PaymentMethod;
   installments?: number;
   cardNumber?: string;
   cardHolder?: string;
   expiryDate?: string;
   cvv?: string;
-}
+  bank?: string;
+};
 
 export interface PaymentDetails {
   CREDIT_CARD: {
     maxInstallments: number;
     minInstallmentValue: number;
+    installments: Array<{
+      quantity: number;
+      value: number;
+      total: number;
+    }>;
   };
   DEBIT_CARD: {
     banks: string[];
   };
   PIX: {
-    qrCodeUrl?: string;
+    qrCodeUrl: string;
     expiresIn: number;
   };
   BOLETO: {
-    barCode?: string;
+    barCode: string;
     expiresIn: number;
   };
 }
+
+
 

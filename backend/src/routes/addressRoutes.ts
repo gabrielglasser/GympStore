@@ -12,6 +12,8 @@ const router = Router();
 // Todas as rotas requerem autenticação
 router.use(authMiddleware);
 
+// Adicionar rota para endereço padrão
+router.get("/default", AddressController.getDefaultAddress);
 router.get("/", AddressController.getAddressesByUser);
 router.get("/:id", AddressController.getAddressById);
 router.post("/", validate(createAddressSchema), AddressController.createAddress);

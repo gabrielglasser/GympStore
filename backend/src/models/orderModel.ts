@@ -1,4 +1,4 @@
-import { OrderStatus, Prisma } from "@prisma/client";
+import { OrderStatus, Prisma, PaymentMethod } from "@prisma/client";
 
 export type OrderWithItems = Prisma.OrderGetPayload<{
   include: {
@@ -20,6 +20,15 @@ export interface CreateOrderInput {
     productId: string;
     quantity: number;
   }[];
+  payment: {
+    method: PaymentMethod;
+    installments?: number;
+    cardNumber?: string;
+    cardHolder?: string;
+    expiryDate?: string;
+    cvv?: string;
+    bank?: string;
+  };
 }
 
 export interface UpdateOrderInput {

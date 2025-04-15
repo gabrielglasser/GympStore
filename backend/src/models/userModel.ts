@@ -7,11 +7,22 @@ export type UserWithAddresses = Prisma.UserGetPayload<{
   };
 }>;
 
-export type AddressWithUser = Prisma.AddressGetPayload<{
-  include: {
-    user: true;
+export interface AddressWithUser {
+  id: string;
+  userId: string;
+  street: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  isDefault: boolean;
+  createdAt: Date;
+  user: {
+    id: string;
+    name: string;
+    email: string;
   };
-}>;
+}
 
 export interface CreateUserInput {
   name: string;
@@ -30,7 +41,6 @@ export interface CreateAddressInput {
   city: string;
   state: string;
   postalCode: string;
-  country?: string;
   isDefault?: boolean;
 }
 

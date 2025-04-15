@@ -128,6 +128,11 @@
   dependencies:
     "@types/node" "*"
 
+"@types/bluebird@*":
+  version "3.5.42"
+  resolved "https://registry.npmjs.org/@types/bluebird/-/bluebird-3.5.42.tgz"
+  integrity sha512-Jhy+MWRlro6UjVi578V/4ZGNfeCOcNCp0YaFNIUGFKlImowqwb1O/22wDVk3FDGMLqxdpOV3qQHD5fPEH4hK6A==
+
 "@types/body-parser@*":
   version "1.19.5"
   resolved "https://registry.npmjs.org/@types/body-parser/-/body-parser-1.19.5.tgz"
@@ -140,6 +145,13 @@
   version "3.4.38"
   resolved "https://registry.npmjs.org/@types/connect/-/connect-3.4.38.tgz"
   integrity sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug==
+  dependencies:
+    "@types/node" "*"
+
+"@types/continuation-local-storage@*":
+  version "3.2.7"
+  resolved "https://registry.npmjs.org/@types/continuation-local-storage/-/continuation-local-storage-3.2.7.tgz"
+  integrity sha512-Q7dPOymVpRG5Zpz90/o26+OAqOG2Sw+FED7uQmTrJNCF/JAPTylclZofMxZKd6W7g1BDPmT9/C/jX0ZcSNTQwQ==
   dependencies:
     "@types/node" "*"
 
@@ -181,6 +193,11 @@
   dependencies:
     "@types/ms" "*"
     "@types/node" "*"
+
+"@types/lodash@*":
+  version "4.17.16"
+  resolved "https://registry.npmjs.org/@types/lodash/-/lodash-4.17.16.tgz"
+  integrity sha512-HX7Em5NYQAXKW+1T+FiuG27NGwzJfCX3s1GjOa7ujxZa52kjJLOr4FUxT+giF6Tgxv1e+/czV/iTtBw27WTU9g==
 
 "@types/mime@^1":
   version "1.3.5"
@@ -224,6 +241,16 @@
     "@types/mime" "^1"
     "@types/node" "*"
 
+"@types/sequelize@^4.28.20":
+  version "4.28.20"
+  resolved "https://registry.npmjs.org/@types/sequelize/-/sequelize-4.28.20.tgz"
+  integrity sha512-XaGOKRhdizC87hDgQ0u3btxzbejlF+t6Hhvkek1HyphqCI4y7zVBIVAGmuc4cWJqGpxusZ1RiBToHHnNK/Edlw==
+  dependencies:
+    "@types/bluebird" "*"
+    "@types/continuation-local-storage" "*"
+    "@types/lodash" "*"
+    "@types/validator" "*"
+
 "@types/serve-static@*":
   version "1.15.7"
   resolved "https://registry.npmjs.org/@types/serve-static/-/serve-static-1.15.7.tgz"
@@ -240,6 +267,11 @@
   dependencies:
     "@types/express" "*"
     "@types/serve-static" "*"
+
+"@types/validator@*":
+  version "13.15.0"
+  resolved "https://registry.npmjs.org/@types/validator/-/validator-13.15.0.tgz"
+  integrity sha512-nh7nrWhLr6CBq9ldtw0wx+z9wKnnv/uTVLA9g/3/TcOYxbpOSZE+MhKPmWqU+K0NvThjhv12uD8MuqijB0WzEA==
 
 abbrev@1:
   version "1.1.1"

@@ -19,11 +19,10 @@ export const userIdSchema = z.object({
 });
 
 export const addressSchema = z.object({
-  street: z.string().min(3, "Rua deve ter pelo menos 3 caracteres"),
-  city: z.string().min(3, "Cidade deve ter pelo menos 3 caracteres"),
-  state: z.string().length(2, "Estado deve ter 2 caracteres"),
+  street: z.string().min(3, "Rua inválida"),
+  city: z.string().min(2, "Cidade inválida"),
+  state: z.string().length(2, "Estado inválido"),
   postalCode: z.string().min(8, "CEP inválido"),
-  country: z.string().optional(),
   isDefault: z.boolean().optional()
 });
 

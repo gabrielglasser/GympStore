@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect } from 'react';
 import { X, AlertCircle, CreditCard, Wallet, QrCode, Receipt } from 'lucide-react';
 import { Button } from '../ui/Button/Button';
@@ -5,6 +6,7 @@ import { PaymentData, PaymentMethod, PaymentDetails } from '../../types';
 import { Address } from '../../types';
 import styles from './PaymentModal.module.scss';
 import { orderService } from '../../services/orderService';
+import { toast } from 'react-toastify';
 
 interface PaymentModalProps {
   onClose: () => void;
@@ -21,7 +23,24 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('CREDIT_CARD');
-  const [paymentDetails, setPaymentDetails] = useState<PaymentDetails | null>(null);
+  const [paymentDetails, setPaymentDetails] = useState<PaymentDetails>({
+    CREDIT_CARD: {
+      maxInstallments: 12,
+      minInstallmentValue: 5,
+      installments: []
+    },
+    DEBIT_CARD: {
+      banks: []
+    },
+    PIX: {
+      qrCodeUrl: '',
+      expiresIn: 15
+    },
+    BOLETO: {
+      barCode: '',
+      expiresIn: 3
+    }
+  });
   const [paymentData, setPaymentData] = useState<PaymentData>({
     method: 'CREDIT_CARD',
     installments: 1
@@ -31,9 +50,12 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
     const loadPaymentDetails = async () => {
       try {
         const details = await orderService.getPaymentDetails(total);
-        setPaymentDetails(details);
+        if (details) {
+          setPaymentDetails(details);
+        }
       } catch (error) {
         console.error('Erro ao carregar detalhes de pagamento:', error);
+        toast.error('Erro ao carregar detalhes de pagamento');
       }
     };
 
@@ -42,19 +64,66 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
   const handleMethodChange = (method: PaymentMethod) => {
     setSelectedMethod(method);
-    setPaymentData({ method });
+    setPaymentData({ 
+      method,
+      installments: method === 'CREDIT_CARD' ? 1 : undefined,
+      cardNumber: undefined,
+      cardHolder: undefined,
+      expiryDate: undefined,
+      cvv: undefined,
+      bank: undefined
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (selectedMethod === 'CREDIT_CARD') {
+      if (!paymentData.cardNumber || !paymentData.cardHolder || !paymentData.expiryDate || !paymentData.cvv) {
+        toast.error('Preencha todos os campos do cartão de crédito');
+        return;
+      }
+    } else if (selectedMethod === 'DEBIT_CARD') {
+      if (!paymentData.bank) {
+        toast.error('Selecione um banco');
+        return;
+      }
+    }
+
     setLoading(true);
     try {
-      await onConfirm(paymentData);
-    } catch (error) {
+      await onConfirm({
+        ...paymentData,
+        method: selectedMethod
+      });
+    } catch (error: any) {
       console.error('Erro ao processar pagamento:', error);
+      toast.error(error.response?.data?.message || 'Erro ao processar pagamento');
     } finally {
       setLoading(false);
     }
+  };
+
+  const renderInstallments = () => {
+    if (!paymentDetails?.CREDIT_CARD) {
+      return (
+        <option value="1">1x de R$ {total.toFixed(2)} sem juros</option>
+      );
+    }
+
+    const { maxInstallments } = paymentDetails.CREDIT_CARD;
+    const installments = [];
+    
+    for (let i = 1; i <= maxInstallments; i++) {
+      const value = total / i;
+      installments.push(
+        <option key={i} value={i}>
+          {i}x de R$ {value.toFixed(2)} sem juros
+        </option>
+      );
+    }
+
+    return installments;
   };
 
   const renderPaymentForm = () => {
@@ -67,7 +136,10 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
               <input
                 type="text"
                 value={paymentData.cardNumber || ''}
-                onChange={e => setPaymentData({ ...paymentData, cardNumber: e.target.value })}
+                onChange={e => setPaymentData({ 
+                  ...paymentData, 
+                  cardNumber: e.target.value.replace(/\D/g, '').replace(/(\d{4})(?=\d)/g, '$1 ')
+                })}
                 placeholder="4111 1111 1111 1111"
                 maxLength={19}
                 required
@@ -114,9 +186,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                 onChange={e => setPaymentData({ ...paymentData, installments: Number(e.target.value) })}
                 required
               >
-                <option value={1}>1x de R$ {total.toFixed(2)} sem juros</option>
-                <option value={2}>2x de R$ {(total / 2).toFixed(2)} sem juros</option>
-                <option value={3}>3x de R$ {(total / 3).toFixed(2)} sem juros</option>
+                {renderInstallments()}
               </select>
             </div>
           </>
@@ -127,8 +197,13 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
           <>
             <div className={styles.formGroup}>
               <label>Banco</label>
-              <select required>
-                {paymentDetails?.DEBIT_CARD.banks.map(bank => (
+              <select 
+                value={paymentData.bank || ''}
+                onChange={e => setPaymentData({ ...paymentData, bank: e.target.value })}
+                required
+              >
+                <option value="">Selecione um banco</option>
+                {paymentDetails?.DEBIT_CARD?.banks.map(bank => (
                   <option key={bank} value={bank}>{bank}</option>
                 ))}
               </select>
@@ -139,19 +214,38 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
       case 'PIX':
         return (
           <div className={styles.pixContainer}>
-            <QrCode size={200} />
-            <p>Escaneie o QR Code para pagar</p>
-            <p>Expira em: {paymentDetails?.PIX.expiresIn} minutos</p>
+            {paymentDetails?.PIX?.qrCodeUrl ? (
+              <>
+                <img 
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${paymentDetails.PIX.qrCodeUrl}`} 
+                  alt="QR Code PIX" 
+                />
+                <p>Escaneie o QR Code para pagar</p>
+                <p>Expira em: {paymentDetails.PIX.expiresIn} minutos</p>
+              </>
+            ) : (
+              <p>Carregando QR Code...</p>
+            )}
           </div>
         );
 
       case 'BOLETO':
         return (
           <div className={styles.boletoContainer}>
-            <p>O boleto será gerado após a confirmação do pedido</p>
-            <p>Vencimento em: {paymentDetails?.BOLETO.expiresIn} dias</p>
+            {paymentDetails?.BOLETO?.barCode ? (
+              <>
+                <p>Código do Boleto:</p>
+                <code>{paymentDetails.BOLETO.barCode}</code>
+                <p>Vencimento em: {paymentDetails.BOLETO.expiresIn} dias</p>
+              </>
+            ) : (
+              <p>Carregando código do boleto...</p>
+            )}
           </div>
         );
+
+      default:
+        return null;
     }
   };
 
@@ -179,11 +273,9 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
 
             <div className={styles.address}>
               <h3>Endereço de Entrega</h3>
-              <p>{address.street}, {address.number}</p>
-              {address.complement && <p>{address.complement}</p>}
-              <p>{address.neighborhood}</p>
+              <p>{address.street}</p>
               <p>{address.city} - {address.state}</p>
-              <p>CEP: {address.cep}</p>
+              <p>CEP: {address.postalCode}</p>
             </div>
           </div>
 

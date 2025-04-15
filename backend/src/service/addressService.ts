@@ -1,17 +1,42 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Address, User } from "@prisma/client";
 import ApiError from "../utils/apiError";
 import { AddressWithUser, CreateAddressInput, UpdateAddressInput } from "../models/userModel";
 
 const prisma = new PrismaClient();
 
+type AddressWithUserPrisma = Address & {
+  user: User;
+};
+
 class AddressService {
+  private mapToAddressWithUser(address: AddressWithUserPrisma): AddressWithUser {
+    return {
+      id: address.id,
+      userId: address.userId,
+      postalCode: address.postalCode,
+      street: address.street,
+      city: address.city,
+      state: address.state,
+      country: address.country,
+      isDefault: address.isDefault,
+      createdAt: address.createdAt,
+      user: {
+        id: address.user.id,
+        name: address.user.name,
+        email: address.user.email
+      }
+    };
+  }
+
   async getAddressesByUserId(userId: string): Promise<AddressWithUser[]> {
-    return await prisma.address.findMany({
+    const addresses = await prisma.address.findMany({
       where: { userId },
       include: {
         user: true
       }
     });
+
+    return addresses.map(this.mapToAddressWithUser);
   }
 
   async getAddressById(id: string): Promise<AddressWithUser> {
@@ -26,58 +51,94 @@ class AddressService {
       throw new ApiError(404, "Endereço não encontrado");
     }
 
-    return address;
+    return this.mapToAddressWithUser(address as AddressWithUserPrisma);
+  }
+
+  async getDefaultAddress(userId: string): Promise<AddressWithUser | null> {
+    const address = await prisma.address.findFirst({
+      where: { 
+        userId,
+        isDefault: true
+      },
+      include: {
+        user: true
+      }
+    });
+
+    if (!address) {
+      // Se não encontrar endereço padrão, retorna o primeiro endereço do usuário
+      const firstAddress = await prisma.address.findFirst({
+        where: { userId },
+        include: {
+          user: true
+        }
+      });
+
+      if (!firstAddress) {
+        return null;
+      }
+
+      return this.mapToAddressWithUser(firstAddress as AddressWithUserPrisma);
+    }
+
+    return this.mapToAddressWithUser(address as AddressWithUserPrisma);
   }
 
   async createAddress(userId: string, input: CreateAddressInput): Promise<AddressWithUser> {
-    // Verifica se o usuário existe
     const userExists = await prisma.user.findUnique({
-        where: { id: userId }
+      where: { id: userId }
     });
     
     if (!userExists) {
-        throw new ApiError(404, "Usuário não encontrado");
+      throw new ApiError(404, "Usuário não encontrado");
     }
 
-    // Se for o primeiro endereço, define como padrão
+    if (!input.postalCode || !input.street || !input.city || !input.state) {
+      throw new ApiError(400, "Todos os campos obrigatórios devem ser preenchidos");
+    }
+
     const userAddresses = await this.getAddressesByUserId(userId);
     const isDefault = userAddresses.length === 0 ? true : input.isDefault || false;
 
-    // Se definido como padrão, remove o padrão dos outros endereços
     if (isDefault) {
-        await prisma.address.updateMany({
-            where: { userId, isDefault: true },
-            data: { isDefault: false }
-        });
+      await prisma.address.updateMany({
+        where: { userId, isDefault: true },
+        data: { isDefault: false }
+      });
     }
 
-    // Cria o endereço CORRETAMENTE
-    return await prisma.address.create({
-        data: {
-            ...input,
-            userId, 
-            isDefault,
-            country: input.country || "Brasil"
-        },
-        include: {
-            user: true
-        }
+    const result = await prisma.address.create({
+      data: {
+        userId,
+        postalCode: input.postalCode,
+        street: input.street,
+        city: input.city,
+        state: input.state,
+        isDefault
+      },
+      include: {
+        user: true
+      }
     });
-}
+
+    return this.mapToAddressWithUser(result as AddressWithUserPrisma);
+  }
 
   async updateAddress(input: UpdateAddressInput): Promise<AddressWithUser> {
     const addressExists = await prisma.address.findUnique({
-      where: { id: input.id }
+      where: { id: input.id },
+      include: {
+        user: true
+      }
     });
 
     if (!addressExists) {
       throw new ApiError(404, "Endereço não encontrado");
     }
 
-    const data: any = { ...input };
+    const data = { ...input } as Partial<UpdateAddressInput>;
     delete data.id;
 
-    // Se estiver marcando como padrão, atualiza os outros
     if (input.isDefault) {
       await prisma.address.updateMany({
         where: { 
@@ -89,13 +150,15 @@ class AddressService {
       });
     }
 
-    return await prisma.address.update({
+    const result = await prisma.address.update({
       where: { id: input.id },
       data,
       include: {
         user: true
       }
     });
+
+    return this.mapToAddressWithUser(result as AddressWithUserPrisma);
   }
 
   async deleteAddress(id: string): Promise<void> {
@@ -105,23 +168,6 @@ class AddressService {
 
     if (!addressExists) {
       throw new ApiError(404, "Endereço não encontrado");
-    }
-
-    // Se for o endereço padrão, define outro como padrão
-    if (addressExists.isDefault) {
-      const anotherAddress = await prisma.address.findFirst({
-        where: {
-          userId: addressExists.userId,
-          NOT: { id }
-        }
-      });
-
-      if (anotherAddress) {
-        await prisma.address.update({
-          where: { id: anotherAddress.id },
-          data: { isDefault: true }
-        });
-      }
     }
 
     await prisma.address.delete({
