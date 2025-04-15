@@ -1,29 +1,24 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, Plus, Minus, Trash2, Loader } from 'lucide-react';
 import { Button } from '../../components/ui/Button/Button';
+import { PaymentModal } from '../../components/cart/PaymentModal';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { CartItem } from '../../types';
+import { CartItem, PaymentData, Address } from '../../types';
 import { correiosService } from '../../services/correiosService';
+import { orderService } from '../../services/orderService';
+import { addressService } from '../../services/addressService';
 import styles from './Cart.module.scss';
 import toast from 'react-hot-toast';
-
-interface Address {
-  cep: string;
-  street: string;
-  number: string;
-  complement: string;
-  neighborhood: string;
-  city: string;
-  state: string;
-}
 
 const Cart: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
-  const { items, updateQuantity, removeFromCart, loading } = useCart();
+  const { items, updateQuantity, removeFromCart, clearCart } = useCart();
+  const [loadingCep, setLoadingCep] = useState(false);
+  const [loadingItems, setLoadingItems] = useState<{ [key: string]: boolean }>({});
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [address, setAddress] = useState<Address>({
     cep: '',
     street: '',
@@ -33,9 +28,6 @@ const Cart: React.FC = () => {
     city: '',
     state: ''
   });
-  const [loadingCep, setLoadingCep] = useState(false);
-  const [loadingFrete, setLoadingFrete] = useState(false);
-  const [shipping, setShipping] = useState(0);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -44,28 +36,38 @@ const Cart: React.FC = () => {
     }
   }, [isAuthenticated, navigate]);
 
+  useEffect(() => {
+    const loadSavedAddress = async () => {
+      try {
+        const savedAddress = await addressService.getDefaultAddress();
+        if (savedAddress) {
+          setAddress(savedAddress);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar endereço:', error);
+      }
+    };
+
+    if (isAuthenticated) {
+      loadSavedAddress();
+    }
+  }, [isAuthenticated]);
+
   const calculateTotal = (items: CartItem[]) => {
     return items.reduce((total, item) => total + (item.product.price * item.quantity), 0);
   };
 
-  const subtotal = calculateTotal(items);
-  const total = subtotal + shipping;
+  const total = calculateTotal(items);
 
   const handleCepChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     let cep = e.target.value.replace(/\D/g, '');
     cep = cep.replace(/(\d{5})(\d)/, '$1-$2');
     setAddress(prev => ({ ...prev, cep }));
-    
+
     if (cep.replace(/\D/g, '').length === 8) {
       try {
         setLoadingCep(true);
-        setLoadingFrete(true);
-
         const endereco = await correiosService.consultarCep(cep);
-        
-        if (!endereco) {
-          throw new Error('CEP não encontrado');
-        }
 
         setAddress(prev => ({
           ...prev,
@@ -74,26 +76,9 @@ const Cart: React.FC = () => {
           city: endereco.localidade,
           state: endereco.uf
         }));
-
-
-        const cepLimpo = cep.replace(/\D/g, '');
-        
-        const pesoTotal = Math.max(0.3, items.reduce((total, item) => {
-          return total + (item.product.weight || 0.1) * item.quantity;
-        }, 0));
-
-        const freteInfo = await correiosService.calcularFrete(cepLimpo, pesoTotal);
-        
-        if (freteInfo && freteInfo.Valor) {
-          const valorFrete = parseFloat(freteInfo.Valor.replace(',', '.'));
-          setShipping(valorFrete);
-        } else {
-          throw new Error('Erro ao calcular frete');
-        }
-
       } catch (error) {
-        console.error('Erro:', error);
-        toast.error(error instanceof Error ? error.message : 'Erro ao calcular frete');
+        console.error('Erro na busca do CEP:', error);
+        toast.error('CEP não encontrado');
         setAddress(prev => ({
           ...prev,
           street: '',
@@ -101,24 +86,58 @@ const Cart: React.FC = () => {
           city: '',
           state: ''
         }));
-        setShipping(0);
       } finally {
         setLoadingCep(false);
-        setLoadingFrete(false);
       }
-    } else {
-      setShipping(0);
     }
   };
 
-  if (loading) {
-    return (
-      <div className={styles.loading}>
-        <Loader className={styles.spinner} />
-        <span>Carregando carrinho...</span>
-      </div>
-    );
-  }
+  const handleUpdateQuantity = async (itemId: string, quantity: number) => {
+    try {
+      setLoadingItems(prev => ({ ...prev, [itemId]: true }));
+      await updateQuantity(itemId, quantity);
+    } finally {
+      setLoadingItems(prev => ({ ...prev, [itemId]: false }));
+    }
+  };
+
+  const handleRemoveFromCart = async (itemId: string) => {
+    try {
+      setLoadingItems(prev => ({ ...prev, [itemId]: true }));
+      await removeFromCart(itemId);
+    } finally {
+      setLoadingItems(prev => ({ ...prev, [itemId]: false }));
+    }
+  };
+
+  const handleFinishPurchase = async (paymentData: PaymentData) => {
+    try {
+      if (!address.id) {
+        const savedAddress = await addressService.saveAddress(address);
+        address.id = savedAddress.id;
+      }
+
+      const order = await orderService.createOrder({
+        addressId: address.id!,
+        items: items.map(item => ({
+          productId: item.product.id,
+          quantity: item.quantity
+        })),
+        payment: {
+          method: 'CREDIT_CARD',
+          installments: paymentData.installments
+        }
+      });
+
+      await clearCart();
+      setShowPaymentModal(false);
+      navigate(`/pedido/${order.id}`);
+      toast.success('Pedido realizado com sucesso!');
+    } catch (error) {
+      console.error('Erro ao finalizar compra:', error);
+      toast.error('Erro ao finalizar compra. Tente novamente.');
+    }
+  };
 
   if (items.length === 0) {
     return (
@@ -140,169 +159,175 @@ const Cart: React.FC = () => {
   }
 
   return (
-    <div className={styles.cart}>
-      <div className="container mx-auto px-4">
-        <div className={styles.header}>
-          <h1>Carrinho de Compras</h1>
-        </div>
+    <>
+      <div className={styles.cart}>
+        <div className="container mx-auto px-4">
+          <div className={styles.header}>
+            <h1>Carrinho de Compras</h1>
+          </div>
 
-        <div className={styles.content}>
-          <div>
-            <div className={styles.items}>
-              {items.map((item) => (
-                <div key={item.id} className={styles.item}>
-                  <img 
-                    src={item.product.images[0]} 
-                    alt={item.product.name} 
-                    className={styles.image} 
-                  />
-                  <div className={styles.info}>
-                    <h3 className={styles.title}>{item.product.name}</h3>
-                    {item.product.flavor && (
-                      <div className={styles.details}>
-                        <p>Sabor: {item.product.flavor}</p>
+          <div className={styles.content}>
+            <div>
+              <div className={styles.items}>
+                {items.map((item) => (
+                  <div key={item.id} className={styles.item}>
+                    <img
+                      src={item.product.images[0]}
+                      alt={item.product.name}
+                      className={styles.image}
+                    />
+                    <div className={styles.info}>
+                      <h3 className={styles.title}>{item.product.name}</h3>
+                      {item.product.flavor && (
+                        <div className={styles.details}>
+                          <p>Sabor: {item.product.flavor}</p>
+                        </div>
+                      )}
+                      <div className={styles.price}>
+                        R$ {item.product.price.toFixed(2)}
                       </div>
-                    )}
-                    <div className={styles.price}>
-                      R$ {item.product.price.toFixed(2)}
+                    </div>
+                    <div className={styles.actions}>
+                      <div className={styles.quantity}>
+                        <button
+                          onClick={() => handleUpdateQuantity(item.id, Math.max(0, item.quantity - 1))}
+                          disabled={loadingItems[item.id] || item.quantity <= 1}
+                        >
+                          <Minus size={16} />
+                        </button>
+                        <span>
+                          {loadingItems[item.id] ? (
+                            <span className={styles.loadingItem}>
+                              <Loader className={styles.spinner} size={14} />
+                            </span>
+                          ) : (
+                            item.quantity
+                          )}
+                        </span>
+                        <button
+                          onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
+                          disabled={loadingItems[item.id] || item.quantity >= item.product.stock}
+                        >
+                          <Plus size={16} />
+                        </button>
+                      </div>
+                      <button
+                        className={styles.remove}
+                        onClick={() => handleRemoveFromCart(item.id)}
+                        disabled={loadingItems[item.id]}
+                      >
+                        <Trash2 size={16} />
+                        {loadingItems[item.id] ? 'Removendo...' : 'Remover'}
+                      </button>
                     </div>
                   </div>
-                  <div className={styles.actions}>
-                    <div className={styles.quantity}>
-                      <button
-                        onClick={() => updateQuantity(item.id, Math.max(0, item.quantity - 1))}
-                        disabled={item.quantity <= 1}
-                      >
-                        <Minus size={16} />
-                      </button>
-                      <span>{item.quantity}</span>
-                      <button
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        disabled={item.quantity >= item.product.stock}
-                      >
-                        <Plus size={16} />
-                      </button>
-                    </div>
-                    <button
-                      className={styles.remove}
-                      onClick={() => removeFromCart(item.id)}
-                    >
-                      <Trash2 size={16} />
-                      Remover
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
 
-            <div className={styles.address}>
-              <h3>Endereço de Entrega</h3>
-              <div className={styles.form}>
-                <div className={styles.formGroup}>
-                  <label htmlFor="cep">CEP</label>
-                  <input
-                    type="text"
-                    id="cep"
-                    value={address.cep}
-                    onChange={handleCepChange}
-                    maxLength={9}
-                    placeholder="00000-000"
-                  />
-                  {loadingCep && <span className={styles.loading}>Buscando CEP...</span>}
-                </div>
-                <div className={styles.formGroup}>
-                  <label htmlFor="street">Rua</label>
-                  <input
-                    type="text"
-                    id="street"
-                    value={address.street}
-                    onChange={(e) => setAddress({ ...address, street: e.target.value })}
-                  />
-                </div>
-                <div className={styles.row}>
+              <div className={styles.address}>
+                <h3>Endereço de Entrega</h3>
+                <div className={styles.form}>
                   <div className={styles.formGroup}>
-                    <label htmlFor="number">Número</label>
+                    <label htmlFor="cep">CEP</label>
                     <input
                       type="text"
-                      id="number"
-                      value={address.number}
-                      onChange={(e) => setAddress({ ...address, number: e.target.value })}
+                      id="cep"
+                      value={address.cep}
+                      onChange={handleCepChange}
+                      maxLength={9}
+                      placeholder="00000-000"
                     />
+                    {loadingCep && <span className={styles.loading}>Buscando CEP...</span>}
                   </div>
                   <div className={styles.formGroup}>
-                    <label htmlFor="complement">Complemento</label>
+                    <label htmlFor="street">Rua</label>
                     <input
                       type="text"
-                      id="complement"
-                      value={address.complement}
-                      onChange={(e) => setAddress({ ...address, complement: e.target.value })}
+                      id="street"
+                      value={address.street}
+                      onChange={(e) => setAddress({ ...address, street: e.target.value })}
                     />
                   </div>
-                </div>
-                <div className={styles.formGroup}>
-                  <label htmlFor="neighborhood">Bairro</label>
-                  <input
-                    type="text"
-                    id="neighborhood"
-                    value={address.neighborhood}
-                    onChange={(e) => setAddress({ ...address, neighborhood: e.target.value })}
-                  />
-                </div>
-                <div className={styles.row}>
-                  <div className={styles.formGroup}>
-                    <label htmlFor="city">Cidade</label>
-                    <input
-                      type="text"
-                      id="city"
-                      value={address.city}
-                      onChange={(e) => setAddress({ ...address, city: e.target.value })}
-                    />
+                  <div className={styles.row}>
+                    <div className={styles.formGroup}>
+                      <label htmlFor="number">Número</label>
+                      <input
+                        type="text"
+                        id="number"
+                        value={address.number}
+                        onChange={(e) => setAddress({ ...address, number: e.target.value })}
+                      />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label htmlFor="complement">Complemento</label>
+                      <input
+                        type="text"
+                        id="complement"
+                        value={address.complement}
+                        onChange={(e) => setAddress({ ...address, complement: e.target.value })}
+                      />
+                    </div>
                   </div>
                   <div className={styles.formGroup}>
-                    <label htmlFor="state">Estado</label>
+                    <label htmlFor="neighborhood">Bairro</label>
                     <input
                       type="text"
-                      id="state"
-                      value={address.state}
-                      onChange={(e) => setAddress({ ...address, state: e.target.value })}
+                      id="neighborhood"
+                      value={address.neighborhood}
+                      onChange={(e) => setAddress({ ...address, neighborhood: e.target.value })}
                     />
+                  </div>
+                  <div className={styles.row}>
+                    <div className={styles.formGroup}>
+                      <label htmlFor="city">Cidade</label>
+                      <input
+                        type="text"
+                        id="city"
+                        value={address.city}
+                        onChange={(e) => setAddress({ ...address, city: e.target.value })}
+                      />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label htmlFor="state">Estado</label>
+                      <input
+                        type="text"
+                        id="state"
+                        value={address.state}
+                        onChange={(e) => setAddress({ ...address, state: e.target.value })}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className={styles.summary}>
-            <h2>Resumo do Pedido</h2>
-            <div className={styles.summaryItem}>
-              <span>Subtotal</span>
-              <span>R$ {subtotal.toFixed(2)}</span>
+            <div className={styles.summary}>
+              <h2>Resumo do Pedido</h2>
+              <div className={styles.summaryItem}>
+                <span>Total</span>
+                <span>R$ {total.toFixed(2)}</span>
+              </div>
+              <Button 
+                className={styles.checkout}
+                onClick={() => setShowPaymentModal(true)}
+                disabled={!address.cep}
+              >
+                Finalizar Compra
+              </Button>
             </div>
-            <div className={`${styles.summaryItem} ${styles.shipping}`}>
-              <span>Frete</span>
-              <span>
-                {loadingFrete ? (
-                  <span className={styles.calculatingShipping}>Calculando...</span>
-                ) : !address.cep ? (
-                  'Calcule o frete informando seu CEP'
-                ) : shipping === 0 ? (
-                  'Grátis'
-                ) : (
-                  `R$ ${shipping.toFixed(2)}`
-                )}
-              </span>
-            </div>
-            <div className={`${styles.summaryItem} ${styles.total}`}>
-              <span>Total</span>
-              <span>R$ {total.toFixed(2)}</span>
-            </div>
-            <Button className={styles.checkout}>
-              Finalizar Compra
-            </Button>
           </div>
         </div>
       </div>
-    </div>
+
+      {showPaymentModal && (
+        <PaymentModal
+          onClose={() => setShowPaymentModal(false)}
+          onConfirm={handleFinishPurchase}
+          address={address}
+          total={total}
+        />
+      )}
+    </>
   );
 };
 

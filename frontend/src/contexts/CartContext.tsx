@@ -24,25 +24,20 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  const loadCart = async () => {
-    try {
-      setLoading(true);
-      const cart = await cartService.getCart();
-      setItems(cart.items);
-    } catch (error) {
-      console.error('Erro ao carregar carrinho:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (isAuthenticated) {
+  const loadCart = React.useCallback(async () => {
+      if (!isAuthenticated) return;
+  
+      try {
+        const cart = await cartService.getCart();
+        setItems(cart.items);
+      } catch (error) {
+        console.error('Erro ao carregar carrinho:', error);
+      }
+    }, [isAuthenticated]);
+  
+    useEffect(() => {
       loadCart();
-    } else {
-      setItems([]);
-    }
-  }, [isAuthenticated]);
+    }, [loadCart]);
 
   const addToCart = async (productId: string, quantity: number) => {
     if (!isAuthenticated) {

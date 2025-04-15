@@ -27,7 +27,6 @@ export const AppRoutes: React.FC = () => {
       <Route path="/carrinho" element={<Navigate to="/cart" replace />} />
       <Route path="/sobre" element={<About />} />
       <Route path="/politica-privacidade" element={<PrivacyPolicy />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 };
