@@ -4,11 +4,22 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   build: {
+    sourcemap: true,
     rollupOptions: {
-      external: ['fast-xml-parser']
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom']
+        }
+      }
     }
   },
-  optimizeDeps: {
-    include: ['fast-xml-parser']
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://gymp-store-backend.vercel.app',
+        changeOrigin: true,
+        secure: false
+      }
+    }
   }
 })
