@@ -9,17 +9,26 @@ import swaggerRouter from './swagger';
 
 const app = express();
 
-app.use(swaggerRouter);
+// Configuração do CORS
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
-// Middlewares
-app.use(cors());
 app.use(helmet());
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
+// Rota de teste para verificar se a API está funcionando
+app.get('/', (req: Request, res: Response) => {
+  res.json({ message: 'API GympStore está funcionando!' });
+});
+
+// Rotas da API
 app.use('/api', routes);
+app.use('/api-docs', swaggerRouter);
 
 // Error handling middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
