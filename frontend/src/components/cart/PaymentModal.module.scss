@@ -4,225 +4,258 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba($text-primary, 0.5);
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  padding: 1rem;
 }
 
 .modal {
-  background: $white;
-  border-radius: $border-radius-lg;
-  padding: $spacing-6;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 500px;
-  position: relative;
+  max-width: 600px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: $shadow-lg;
+  position: relative;
+  animation: slideIn 0.3s ease-out;
+
+  @keyframes slideIn {
+    from {
+      transform: translateY(-20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
 }
 
 .closeButton {
   position: absolute;
-  top: $spacing-4;
-  right: $spacing-4;
+  top: 1rem;
+  right: 1rem;
   background: none;
   border: none;
+  color: #666;
   cursor: pointer;
-  color: $text-secondary;
-  transition: $transition-base;
-  
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: all 0.2s;
+
   &:hover {
-    color: $text-primary;
+    background-color: #f0f0f0;
+    color: #333;
   }
 }
 
 .content {
+  padding: 2rem;
+
   h2 {
-    font-size: $font-size-xl;
-    font-weight: 700;
-    margin-bottom: $spacing-6;
-    color: $text-primary;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: #333;
+  }
+
+  h3 {
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    color: #444;
   }
 }
 
 .warning {
   display: flex;
   align-items: center;
-  gap: $spacing-2;
-  padding: $spacing-3;
-  background: rgba($secondary, 0.1);
-  border: 1px solid rgba($secondary, 0.3);
-  border-radius: $border-radius;
-  margin-bottom: $spacing-6;
-  
+  gap: 0.5rem;
+  background-color: #fff3cd;
+  border: 1px solid #ffeeba;
+  color: #856404;
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+
   svg {
-    color: $secondary;
-  }
-  
-  p {
-    color: $text-secondary;
-    font-size: $font-size-sm;
+    flex-shrink: 0;
   }
 }
 
-.orderSummary,
-.addressConfirmation {
-  margin-bottom: $spacing-6;
-  padding: $spacing-4;
-  background: $background;
-  border-radius: $border-radius;
+.orderSummary {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
 
-  h3 {
-    font-size: $font-size-lg;
+  .total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.2rem;
     font-weight: 600;
-    margin-bottom: $spacing-3;
-    color: $text-primary;
+    margin-top: 0.5rem;
   }
+}
+
+.addressConfirmation {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
 
   p {
-    color: $text-secondary;
-    margin-bottom: $spacing-2;
-    font-size: $font-size-sm;
+    margin: 0.25rem 0;
+    color: #666;
+  }
+}
 
-    &:last-child {
-      margin-bottom: 0;
+.paymentMethods {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.methodButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  border: 2px solid #dee2e6;
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  svg {
+    color: #666;
+  }
+
+  span {
+    font-size: 0.9rem;
+    color: #666;
+    text-align: center;
+  }
+
+  &:hover {
+    border-color: #007bff;
+    background-color: #f8f9fa;
+
+    svg {
+      color: #007bff;
     }
   }
-}
 
-.total {
-  display: flex;
-  justify-content: space-between;
-  font-weight: 700;
-  color: $text-primary;
-  font-size: $font-size-lg;
-  margin-top: $spacing-2;
+  &.active {
+    border-color: #007bff;
+    background-color: #e7f1ff;
+
+    svg {
+      color: #007bff;
+    }
+
+    span {
+      color: #007bff;
+    }
+  }
 }
 
 .formGroup {
-  margin-bottom: $spacing-4;
-  
+  margin-bottom: 1rem;
+
   label {
     display: block;
-    margin-bottom: $spacing-2;
-    font-weight: 600;
-    color: $text-primary;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #444;
   }
-  
-  input, select {
+
+  input,
+  select {
     width: 100%;
-    padding: $spacing-3;
-    border: 1px solid rgba($text-primary, 0.2);
-    border-radius: $border-radius;
-    transition: $transition-base;
-    font-size: $font-size-base;
-    
+    padding: 0.75rem;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+
     &:focus {
-      border-color: $primary;
       outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
     }
 
-    &:disabled {
-      background-color: $background;
-      cursor: not-allowed;
+    &::placeholder {
+      color: #adb5bd;
     }
   }
 }
 
 .row {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: $spacing-4;
+  grid-template-columns: 2fr 1fr;
+  gap: 1rem;
 }
 
-.paymentMethods {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: $spacing-4;
-  margin-bottom: $spacing-6;
-}
-
-.methodButton {
-  display: flex;
-  align-items: center;
-  gap: $spacing-2;
-  padding: $spacing-4;
-  border: 1px solid rgba($text-primary, 0.2);
-  border-radius: $border-radius;
-  background: $white;
+.button {
+  width: 100%;
+  padding: 1rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: $transition-base;
+  transition: background-color 0.2s;
 
   &:hover {
-    border-color: $primary;
+    background-color: #0056b3;
   }
 
-  &.active {
-    border-color: $primary;
-    background: rgba($primary, 0.1);
-  }
-
-  svg {
-    color: $text-secondary;
-  }
-
-  span {
-    font-weight: 600;
+  &:disabled {
+    background-color: #adb5bd;
+    cursor: not-allowed;
   }
 }
 
-.pixContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
+.pixContainer,
+.boletoContainer {
+  text-align: center;
   padding: 2rem;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
 
   img {
-    border: 1px solid #ddd;
-    padding: 1rem;
+    margin: 1.5rem 0;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
   }
-
-  text-align: center;
-  padding: $spacing-6;
-  background: $background;
-  border-radius: $border-radius;
-  margin-bottom: $spacing-6;
-
-  p {
-    margin-top: $spacing-4;
-    color: $text-secondary;
-  }
-}
-
-.boletoContainer {
-  padding: 2rem;
-  text-align: center;
 
   code {
     display: block;
     padding: 1rem;
-    background: #f5f5f5;
-    border: 1px solid #ddd;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
     border-radius: 4px;
-    margin: 1rem 0;
+    font-family: monospace;
     font-size: 1.1rem;
+    margin: 1.5rem 0;
     word-break: break-all;
   }
 
-  text-align: center;
-  padding: $spacing-6;
-  background: $background;
-  border-radius: $border-radius;
-  margin-bottom: $spacing-6;
-
   p {
-    margin-top: $spacing-4;
-    color: $text-secondary;
+    color: #666;
+    margin: 0.5rem 0;
   }
 }
 
@@ -234,29 +267,6 @@
   
   p {
     color: $text-secondary;
-  }
-}
-
-.button {
-  width: 100%;
-  padding: $spacing-4;
-  background: $primary;
-  color: $white;
-  border: none;
-  border-radius: $border-radius;
-  font-weight: 600;
-  font-size: $font-size-lg;
-  cursor: pointer;
-  transition: $transition-base;
-  margin-top: $spacing-6;
-
-  &:hover {
-    background: $primary-dark;
-  }
-
-  &:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
   }
 }
 

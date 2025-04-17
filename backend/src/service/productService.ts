@@ -1,8 +1,20 @@
 import { PrismaClient } from "@prisma/client";
 import ApiError from "../utils/apiError";
 import { ProductWithCategory, CreateProductInput, UpdateProductInput } from "../models/productModel";
+import axios from 'axios';
+import FormData from 'form-data';
+import fs from 'fs';
+import path from 'path';
+import { v2 as cloudinary } from 'cloudinary';
 
 const prisma = new PrismaClient();
+
+// Configuração do Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 class ProductService {
   async getAllProducts(): Promise<ProductWithCategory[]> {
@@ -33,8 +45,33 @@ class ProductService {
     return product;
   }
 
+  private async uploadExternalImageToCloudinary(imageUrl: string): Promise<string> {
+    try {
+      // Baixa a imagem
+      const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+      const buffer = Buffer.from(response.data, 'binary');
+      
+      // Salva temporariamente
+      const tempPath = path.join('tmp', `temp-${Date.now()}.jpg`);
+      fs.writeFileSync(tempPath, buffer);
+
+      // Upload para o Cloudinary usando a API v2
+      const result = await cloudinary.uploader.upload(tempPath, {
+        folder: 'gymp',
+        resource_type: 'auto'
+      });
+      
+      // Remove arquivo temporário
+      fs.unlinkSync(tempPath);
+      
+      return result.secure_url;
+    } catch (error) {
+      console.error('Erro ao fazer upload da imagem:', error);
+      throw new ApiError(500, 'Erro ao processar imagem');
+    }
+  }
+
   async createProduct(input: CreateProductInput): Promise<ProductWithCategory> {
-    // Verifica se a categoria existe
     const categoryExists = await prisma.category.findUnique({
       where: { id: input.categoryId },
     });
@@ -43,9 +80,26 @@ class ProductService {
       throw new ApiError(404, "Categoria não encontrada");
     }
 
+    // Processa as imagens
+    const processedImages = await Promise.all(
+      input.images.map(async (image: string) => {
+        if (image.startsWith('http')) {
+          return await this.uploadExternalImageToCloudinary(image);
+        }
+        return image;
+      })
+    );
+
     return await prisma.product.create({
       data: {
-        ...input,
+        name: input.name,
+        description: input.description,
+        price: input.price,
+        stock: input.stock,
+        categoryId: input.categoryId,
+        brand: input.brand,
+        weight: input.weight,
+        images: processedImages,
         flavor: input.flavor || null,
       },
       include: {

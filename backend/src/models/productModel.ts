@@ -8,15 +8,16 @@ export type ProductWithCategory = Prisma.ProductGetPayload<{
 }>;
 
 export interface CreateProductInput {
+  images: any;
+  weight: any;
+  brand: any;
   name: string;
   description: string;
   price: number;
   stock: number;
-  images: string[];
   categoryId: string;
-  brand: string;
-  weight: number;
-  flavor?: string;
+  flavor?: string | null;
+  imageUrl: string; 
 }
 
 export interface UpdateProductInput extends Partial<CreateProductInput> {

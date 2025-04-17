@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, Plus, Minus, Trash2, Loader } from 'lucide-react';
 import { Button } from '../../components/ui/Button/Button';
 import { PaymentModal } from '../../components/cart/PaymentModal';
-import { SuccessModal } from '../../components/ui/SuccessModal/SuccessModal';
+import { SuccessModal } from '../../components/cart/SuccessModal';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { CartItem, PaymentData, Address } from '../../types';
@@ -13,6 +13,8 @@ import { orderService } from '../../services/orderService';
 import { addressService } from '../../services/addressService';
 import styles from './Cart.module.scss';
 import toast from 'react-hot-toast';
+import { CartItem as CartItemComponent } from '../../components/cart/CartItem';
+import { AddressForm } from '../../components/address/AddressForm';
 
 const Cart: React.FC = () => {
   const navigate = useNavigate();
@@ -27,7 +29,9 @@ const Cart: React.FC = () => {
     street: '',
     city: '',
     state: '',
-    postalCode: ''
+    postalCode: '',
+    number: '',
+    neighborhood: '',
   });
 
   useEffect(() => {
@@ -44,58 +48,43 @@ const Cart: React.FC = () => {
 
   const total = calculateTotal(items);
 
-  const handlePostalCodeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    let postalCode = e.target.value.replace(/\D/g, '');
-    postalCode = postalCode.replace(/(\d{5})(\d)/, '$1-$2');
-    setAddress(prev => ({ ...prev, postalCode }));
-
-    if (postalCode.replace(/\D/g, '').length === 8) {
+  const handlePostalCodeChange = async (postalCode: string) => {
+    if (postalCode.length === 9) { // Formato: 00000-000
       try {
         setLoadingCep(true);
-        const endereco = await correiosService.consultarCep(postalCode);
+        const cepLimpo = postalCode.replace(/\D/g, '');
+        const endereco = await correiosService.consultarCep(cepLimpo);
 
         setAddress(prev => ({
           ...prev,
           street: endereco.logradouro,
+          neighborhood: endereco.bairro,
           city: endereco.localidade,
-          state: endereco.uf
+          state: endereco.uf,
+          postalCode
         }));
       } catch (error) {
         console.error('Erro na busca do CEP:', error);
         toast.error('CEP não encontrado');
-        setAddress(prev => ({
-          ...prev,
-          street: '',
-          city: '',
-          state: ''
-        }));
       } finally {
         setLoadingCep(false);
       }
     }
   };
 
-  const handleUpdateQuantity = async (itemId: string, quantity: number) => {
-    try {
-      setLoadingItems(prev => ({ ...prev, [itemId]: true }));
-      await updateQuantity(itemId, quantity);
-    } finally {
-      setLoadingItems(prev => ({ ...prev, [itemId]: false }));
-    }
-  };
-
-  const handleRemoveFromCart = async (itemId: string) => {
-    try {
-      setLoadingItems(prev => ({ ...prev, [itemId]: true }));
-      await removeFromCart(itemId);
-    } finally {
-      setLoadingItems(prev => ({ ...prev, [itemId]: false }));
+  const handleAddressChange = (field: keyof Address, value: string) => {
+    if (field === 'postalCode') {
+      const formattedValue = value.replace(/\D/g, '').replace(/(\d{5})(\d)/, '$1-$2').slice(0, 9);
+      setAddress(prev => ({ ...prev, [field]: formattedValue }));
+      handlePostalCodeChange(formattedValue);
+    } else {
+      setAddress(prev => ({ ...prev, [field]: value }));
     }
   };
 
   const handleFinishPurchase = async (paymentData: PaymentData) => {
     try {
-      if (!address.postalCode || !address.street || !address.city || !address.state) {
+      if (!address.postalCode || !address.street || !address.city || !address.state || !address.number || !address.neighborhood) {
         toast.error('Por favor, preencha todos os campos do endereço');
         return;
       }
@@ -109,7 +98,7 @@ const Cart: React.FC = () => {
           });
           addressId = savedAddress.id;
         }
-      } catch (error: any) {
+      } catch (error) {
         console.error('Erro ao salvar endereço:', error);
         toast.error('Erro ao salvar endereço. Por favor, tente novamente.');
         return;
@@ -119,32 +108,30 @@ const Cart: React.FC = () => {
         toast.error('Erro ao processar endereço. Por favor, tente novamente.');
         return;
       }
-      try {
-        const order = await orderService.createOrder({
-          addressId,
-          items: items.map(item => ({
-            productId: item.product.id,
-            quantity: item.quantity
-          })),
-          payment: paymentData
-        });
 
-        await clearCart();
-        setShowPaymentModal(false);
-        setOrderId(order.id);
-        setShowSuccessModal(true);
-        
-        setAddress({
-          street: '',
-          city: '',
-          state: '',
-          postalCode: ''
-        });
+      const order = await orderService.createOrder({
+        addressId,
+        items: items.map(item => ({
+          productId: item.product.id,
+          quantity: item.quantity
+        })),
+        payment: paymentData
+      });
 
-      } catch (error: any) {
-        console.error('Erro ao criar pedido:', error);
-        toast.error('Erro ao finalizar compra. Por favor, tente novamente.');
-      }
+      await clearCart();
+      setShowPaymentModal(false);
+      setOrderId(order.id);
+      setShowSuccessModal(true);
+      
+      setAddress({
+        street: '',
+        city: '',
+        state: '',
+        postalCode: '',
+        number: '',
+        neighborhood: '',
+      });
+
     } catch (error) {
       console.error('Erro ao finalizar compra:', error);
       toast.error('Erro ao finalizar compra. Por favor, tente novamente.');
@@ -152,7 +139,7 @@ const Cart: React.FC = () => {
   };
 
   const handleOpenPaymentModal = () => {
-    if (!address.postalCode || !address.street || !address.city || !address.state) {
+    if (!address.postalCode || !address.street || !address.city || !address.state || !address.number || !address.neighborhood) {
       toast.error('Por favor, preencha todos os campos do endereço');
       return;
     }
@@ -179,148 +166,68 @@ const Cart: React.FC = () => {
   }
 
   return (
-    <>
-      <div className={styles.cart}>
-        <div className="container">
-          <div className={styles.header}>
-            <h1>Carrinho de Compras</h1>
-          </div>
+    <div className="min-h-screen bg-gray-50 pt-24 pb-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Carrinho de Compras</h1>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Revise seus itens e complete sua compra
+          </p>
+        </div>
 
-          <div className={styles.content}>
-            <div className={styles.items}>
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Lista de Produtos */}
+          <div className="flex-1">
+            <div className="bg-white rounded-lg shadow-sm p-4 md:p-6">
               {items.map((item) => (
-                <div key={item.id} className={styles.item}>
-                  <img
-                    src={item.product.images[0]}
-                    alt={item.product.name}
-                    className={styles.image}
-                  />
-                  <div className={styles.info}>
-                    <h3 className={styles.title}>{item.product.name}</h3>
-                    {item.product.flavor && (
-                      <div className={styles.details}>
-                        <p>Sabor: {item.product.flavor}</p>
-                      </div>
-                    )}
-                    <div className={styles.price}>
-                      R$ {item.product.price.toFixed(2)}
-                    </div>
-                  </div>
-                  <div className={styles.actions}>
-                    <div className={styles.quantity}>
-                      <button
-                        onClick={() => handleUpdateQuantity(item.id, Math.max(0, item.quantity - 1))}
-                        disabled={loadingItems[item.id] || item.quantity <= 1}
-                      >
-                        <Minus size={16} />
-                      </button>
-                      <span>
-                        {loadingItems[item.id] ? (
-                          <span className={styles.loadingItem}>
-                            <Loader className={styles.spinner} size={14} />
-                          </span>
-                        ) : (
-                          item.quantity
-                        )}
-                      </span>
-                      <button
-                        onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
-                        disabled={loadingItems[item.id] || item.quantity >= item.product.stock}
-                      >
-                        <Plus size={16} />
-                      </button>
-                    </div>
-                    <button
-                      className={styles.remove}
-                      onClick={() => handleRemoveFromCart(item.id)}
-                      disabled={loadingItems[item.id]}
-                    >
-                      <Trash2 size={16} />
-                      {loadingItems[item.id] ? 'Removendo...' : 'Remover'}
-                    </button>
-                  </div>
-                </div>
+                <CartItemComponent key={item.product.id} item={item} />
               ))}
             </div>
+          </div>
 
-            <div className={styles.summary}>
-              <h2>Resumo do Pedido</h2>
-              <div className={`${styles.summaryItem} ${styles.total}`}>
-                <span>Total</span>
-                <span>R$ {total.toFixed(2)}</span>
-              </div>
-              <div className={styles.address}>
-                <h3>Endereço de Entrega</h3>
-                <div className={styles.form}>
-                  <div className={styles.formGroup}>
-                    <label htmlFor="postalCode">CEP</label>
-                    <div className={styles.postalCodeInput}>
-                      <input
-                        type="text"
-                        id="postalCode"
-                        value={address.postalCode}
-                        onChange={handlePostalCodeChange}
-                        placeholder="00000-000"
-                      />
-                      {loadingCep && <Loader className={styles.spinner} size={14} />}
-                    </div>
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label htmlFor="street">Rua</label>
-                    <input
-                      type="text"
-                      id="street"
-                      value={address.street}
-                      onChange={(e) => setAddress({ ...address, street: e.target.value })}
-                    />
-                  </div>
-                  <div className={styles.row}>
-                    <div className={styles.formGroup}>
-                      <label htmlFor="city">Cidade</label>
-                      <input
-                        type="text"
-                        id="city"
-                        value={address.city}
-                        onChange={(e) => setAddress({ ...address, city: e.target.value })}
-                      />
-                    </div>
-                    <div className={styles.formGroup}>
-                      <label htmlFor="state">Estado</label>
-                      <input
-                        type="text"
-                        id="state"
-                        value={address.state}
-                        onChange={(e) => setAddress({ ...address, state: e.target.value })}
-                      />
-                    </div>
-                  </div>
+          {/* Resumo do Pedido */}
+          <div className="w-full lg:w-96">
+            <div className="bg-white rounded-lg shadow-sm p-6 sticky top-24">
+              <h2 className="text-xl font-semibold mb-4">Resumo do Pedido</h2>
+              <div className="space-y-4">
+                <div className="flex justify-between font-bold text-lg">
+                  <span>Total</span>
+                  <span>R$ {total.toFixed(2)}</span>
                 </div>
+                <div className="space-y-4">
+                  <h3 className="font-semibold">Endereço de Entrega</h3>
+                  <AddressForm
+                    address={address}
+                    onChange={handleAddressChange}
+                    loading={loadingCep}
+                  />
+                </div>
+                <button
+                  onClick={handleOpenPaymentModal}
+                  className="w-full bg-primary text-white py-3 rounded-md font-semibold hover:bg-primary-dark transition-colors"
+                >
+                  Finalizar Compra
+                </button>
               </div>
-              <Button 
-                className={styles.checkout}
-                onClick={handleOpenPaymentModal}
-                disabled={!address.postalCode}
-              >
-                Finalizar Compra
-              </Button>
             </div>
           </div>
         </div>
       </div>
 
-      {showPaymentModal && (
-        <PaymentModal
-          onClose={() => setShowPaymentModal(false)}
-          onConfirm={handleFinishPurchase}
-          address={address}
-          total={total}
-        />
-      )}
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        total={total}
+        address={address}
+        onPaymentComplete={handleFinishPurchase}
+      />
 
-      {showSuccessModal && (
-        <SuccessModal orderId={orderId} />
-      )}
-    </>
+      <SuccessModal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        orderId={orderId}
+      />
+    </div>
   );
 };
 

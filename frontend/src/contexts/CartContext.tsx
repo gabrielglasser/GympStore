@@ -1,19 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-refresh/only-export-components */
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { cartService } from '../services/cartService';
 import { useAuth } from './AuthContext';
-import { CartItem } from '../types';
+import { CartItem, Product } from '../types';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
 interface CartContextData {
   items: CartItem[];
-  addToCart: (productId: string, quantity: number) => Promise<void>;
+  addToCart: (product: Product, quantity?: number) => Promise<void>;
   updateQuantity: (itemId: string, quantity: number) => Promise<void>;
   removeFromCart: (itemId: string) => Promise<void>;
   clearCart: () => Promise<void>;
   loading: boolean;
+  total: number;
 }
 
 const CartContext = createContext<CartContextData>({} as CartContextData);
@@ -24,22 +25,22 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  const loadCart = React.useCallback(async () => {
-      if (!isAuthenticated) return;
-  
-      try {
-        const cart = await cartService.getCart();
-        setItems(cart.items);
-      } catch (error) {
-        console.error('Erro ao carregar carrinho:', error);
-      }
-    }, [isAuthenticated]);
-  
-    useEffect(() => {
-      loadCart();
-    }, [loadCart]);
+  const loadCart = useCallback(async () => {
+    if (!isAuthenticated) return;
 
-  const addToCart = async (productId: string, quantity: number) => {
+    try {
+      const cart = await cartService.getCart();
+      setItems(cart.items);
+    } catch (error) {
+      console.error('Erro ao carregar carrinho:', error);
+    }
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    loadCart();
+  }, [loadCart]);
+
+  const addToCart = useCallback(async (product: Product, quantity: number = 1) => {
     if (!isAuthenticated) {
       navigate('/auth');
       toast.error('Faça login para adicionar produtos ao carrinho');
@@ -48,7 +49,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     try {
       setLoading(true);
-      const cart = await cartService.addToCart(productId, quantity);
+      const cart = await cartService.addToCart(product.id, quantity);
       setItems(cart.items);
       toast.success('Produto adicionado ao carrinho');
     } catch (error: any) {
@@ -58,11 +59,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setLoading(false);
     }
-  };
+  }, [isAuthenticated, navigate]);
 
-  const updateQuantity = async (itemId: string, quantity: number) => {
+  const updateQuantity = useCallback(async (itemId: string, quantity: number) => {
     if (quantity === 0) {
-      return removeFromCart(itemId);
+      await removeFromCart(itemId);
+      return;
     }
 
     try {
@@ -75,9 +77,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const removeFromCart = async (itemId: string) => {
+  const removeFromCart = useCallback(async (itemId: string) => {
     try {
       setLoading(true);
       const cart = await cartService.removeFromCart(itemId);
@@ -89,9 +91,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const clearCart = async () => {
+  const clearCart = useCallback(async () => {
     try {
       setLoading(true);
       await cartService.clearCart();
@@ -103,17 +105,20 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  const total = items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
 
   return (
-    <CartContext.Provider 
-      value={{ 
-        items, 
-        addToCart, 
-        updateQuantity, 
-        removeFromCart, 
+    <CartContext.Provider
+      value={{
+        items,
+        addToCart,
+        updateQuantity,
+        removeFromCart,
         clearCart,
-        loading 
+        loading,
+        total
       }}
     >
       {children}
@@ -124,7 +129,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 export const useCart = () => {
   const context = useContext(CartContext);
   if (!context) {
-    throw new Error('useCart deve ser usado dentro de um CartProvider');
+    throw new Error('useCart must be used within a CartProvider');
   }
   return context;
 };

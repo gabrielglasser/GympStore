@@ -1,13 +1,13 @@
 import React from 'react';
 import { X } from 'lucide-react';
-import { Button } from '../../ui/Button/Button';
+import { Button } from '../Button/Button';
 import { Product } from '../../../types';
 import styles from './ProductModal.module.scss';
 
 interface ProductModalProps {
   product: Product;
   onClose: () => void;
-  onAddToCart: (product: Product) => void;
+  onAddToCart: (product: Product) => Promise<void>;
 }
 
 export const ProductModal: React.FC<ProductModalProps> = ({
