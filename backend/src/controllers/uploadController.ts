@@ -5,14 +5,22 @@ export class UploadController {
   static async uploadImage(req: Request, res: Response) {
     try {
       if (!req.file) {
-        return res.status(400).json({ error: 'Nenhuma imagem foi enviada' });
+        return res.status(400).json({ 
+          success: false,
+          message: 'Nenhuma imagem foi enviada' 
+        });
       }
 
-      const result = await UploadService.uploadImage(req.file);
-      return res.status(200).json(result);
+      const imageUrl = await UploadService.uploadImage(req.file);
+      return res.status(200).json({ 
+        success: true,
+        url: imageUrl 
+      });
     } catch (error) {
-      console.error('Erro no controller de upload:', error);
-      return res.status(500).json({ error: 'Erro ao fazer upload da imagem' });
+      return res.status(500).json({ 
+        success: false,
+        message: error instanceof Error ? error.message : 'Erro ao processar imagem'
+      });
     }
   }
 
@@ -20,14 +28,22 @@ export class UploadController {
     try {
       const { publicId } = req.params;
       if (!publicId) {
-        return res.status(400).json({ error: 'ID público da imagem não fornecido' });
+        return res.status(400).json({ 
+          success: false,
+          message: 'ID público da imagem não fornecido' 
+        });
       }
 
       const result = await UploadService.deleteImage(publicId);
-      return res.status(200).json(result);
+      return res.status(200).json({ 
+        success: true,
+        result 
+      });
     } catch (error) {
-      console.error('Erro ao deletar imagem:', error);
-      return res.status(500).json({ error: 'Erro ao deletar a imagem' });
+      return res.status(500).json({ 
+        success: false,
+        message: error instanceof Error ? error.message : 'Erro ao deletar a imagem'
+      });
     }
   }
 } 
