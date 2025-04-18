@@ -61,6 +61,11 @@ export interface PaymentDetails {
     expiresIn: number;
   };
 }
+export interface Cart {
+  id: string;
+  items: CartItem[];
+  total: number;
+}
 
 export interface Address {
   id?: string;
