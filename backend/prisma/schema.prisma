@@ -41,12 +41,12 @@ model Address {
 }
 
 model Product {
-  id          String      @id @default(uuid())
+  id          String    @id @default(uuid())
   name        String
   description String
   price       Float
   stock       Int
-  image       String?
+  image       String    
   categoryId  String
   category    Category    @relation(fields: [categoryId], references: [id])
   brand       String

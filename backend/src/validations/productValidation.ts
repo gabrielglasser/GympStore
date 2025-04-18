@@ -15,11 +15,9 @@ const productSchema = z.object({
     required_error: "Estoque é obrigatório",
     invalid_type_error: "Estoque deve ser um número"
   }).int("Estoque deve ser inteiro").nonnegative("Estoque não pode ser negativo"),
-  images: z.array(
-    z.string({
-      required_error: "Imagens são obrigatórias"
-    }).url("URL da imagem inválida")
-  ).min(1, "Pelo menos uma imagem é necessária"),
+  image: z.string({
+    required_error: "Imagem é obrigatória"
+  }).url("URL da imagem inválida"),
   categoryId: z.string({
     required_error: "ID da categoria é obrigatório"
   }).uuid("ID da categoria deve ser um UUID válido"),
@@ -34,6 +32,6 @@ const productSchema = z.object({
 }).strict();
 
 export const createProductSchema = productSchema;
-export const updateProductSchema = productSchema.extend({
+export const updateProductSchema = productSchema.partial().extend({
   id: z.string().uuid("ID do produto deve ser um UUID válido"),
 });
