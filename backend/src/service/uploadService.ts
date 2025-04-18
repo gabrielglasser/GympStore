@@ -1,35 +1,38 @@
-import cloudinary, { uploadToCloudinary } from '../config/cloudinary';
-import fs from 'fs';
-import path from 'path';
+import cloudinary from '../config/cloudinary';
+import { Readable } from 'stream';
 
 export class UploadService {
   static async uploadImage(file: Express.Multer.File) {
     try {
       console.log('Recebendo arquivo para upload:', {
         originalname: file.originalname,
-        path: file.path,
+        mimetype: file.mimetype,
         size: file.size
       });
 
-      if (!file.path || !fs.existsSync(file.path)) {
-        throw new Error('Arquivo não encontrado no caminho especificado');
-      }
+      return new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            folder: 'gymp',
+            resource_type: 'auto',
+          },
+          (error: any, result: any) => {
+            if (error) {
+              console.error('Erro no upload:', error);
+              reject(error);
+              return;
+            }
+            console.log('Upload realizado com sucesso:', result);
+            resolve({
+              url: result.secure_url,
+              public_id: result.public_id
+            });
+          }
+        );
 
-      const result = await uploadToCloudinary(file);
-      
-      // Tenta remover o arquivo temporário
-      try {
-        if (fs.existsSync(file.path)) {
-          fs.unlinkSync(file.path);
-        }
-      } catch (unlinkError) {
-        console.warn('Aviso: Não foi possível remover o arquivo temporário:', unlinkError);
-      }
-      
-      return {
-        url: result.secure_url,
-        public_id: result.public_id
-      };
+        const stream = Readable.from(file.buffer);
+        stream.pipe(uploadStream);
+      });
     } catch (error) {
       console.error('Erro detalhado no serviço de upload:', error);
       throw error;
