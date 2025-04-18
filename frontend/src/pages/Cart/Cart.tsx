@@ -86,6 +86,13 @@ const Cart: React.FC = () => {
 
   const handleFinishPurchase = async (paymentData: PaymentData) => {
     try {
+      const token = authService.getToken();
+      if (!token) {
+        toast.error('Sessão expirada. Por favor, faça login novamente.');
+        navigate('/auth');
+        return;
+      }
+
       if (!address.postalCode || !address.street || !address.city || !address.state || !address.number || !address.neighborhood) {
         toast.error('Por favor, preencha todos os campos do endereço');
         return;
@@ -134,9 +141,14 @@ const Cart: React.FC = () => {
         neighborhood: '',
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao finalizar compra:', error);
-      toast.error('Erro ao finalizar compra. Por favor, tente novamente.');
+      if (error.message === 'Token não fornecido') {
+        toast.error('Sessão expirada. Por favor, faça login novamente.');
+        navigate('/auth');
+      } else {
+        toast.error('Erro ao finalizar compra. Por favor, tente novamente.');
+      }
     }
   };
 

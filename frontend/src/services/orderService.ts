@@ -29,6 +29,9 @@ interface PaymentDetailsResponse {
 export const orderService = {
   createOrder: async (data: CreateOrderPayload): Promise<Order> => {
     const token = authService.getToken();
+    if (!token) {
+      throw new Error('Token não fornecido');
+    }
     const response = await api.post<OrderResponse>('/orders', data, {
       headers: {
         Authorization: `Bearer ${token}`
@@ -39,6 +42,9 @@ export const orderService = {
 
   getPaymentDetails: async (total: number): Promise<PaymentDetails> => {
     const token = authService.getToken();
+    if (!token) {
+      throw new Error('Token não fornecido');
+    }
     const response = await api.get<PaymentDetailsResponse>('/payment/details', {
       params: { total },
       headers: {
