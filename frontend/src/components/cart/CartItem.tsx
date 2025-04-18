@@ -11,7 +11,7 @@ interface CartItemProps {
       id: string;
       name: string;
       price: number;
-      images: string[];
+      image: string; // Atualizado de images para image
       flavor?: string;
       stock: number;
     };
@@ -50,7 +50,14 @@ export function CartItem({ item }: CartItemProps) {
   return (
     <div className={styles.cartItem}>
       <div className={styles.imageContainer}>
-        <img src={item.product.images[0]} alt={item.product.name} />
+        <img 
+          src={item.product.image || 'https://res.cloudinary.com/dpenlfh9l/image/upload/v1/gymp/no-image-placeholder.jpg'} 
+          alt={item.product.name}
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.src = 'https://res.cloudinary.com/dpenlfh9l/image/upload/v1/gymp/no-image-placeholder.jpg';
+          }}
+        />
       </div>
 
       <div className={styles.details}>
@@ -89,4 +96,4 @@ export function CartItem({ item }: CartItemProps) {
       </div>
     </div>
   );
-} 
+}
