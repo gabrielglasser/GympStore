@@ -68,9 +68,13 @@ export const FeaturedProducts: React.FC = () => {
             onClick={() => handleProductClick(product)}
           >
             <img 
-              src={product.images[0]} 
+              src={product.image} 
               alt={product.name} 
-              className={styles.image} 
+              className={styles.image}
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = 'https://res.cloudinary.com/dpenlfh9l/image/upload/v1/gymp/no-image-placeholder.jpg';
+              }}
             />
             <div className={styles.content}>
               <div className={styles.category}>{product.category.name}</div>

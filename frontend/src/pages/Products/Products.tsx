@@ -67,7 +67,7 @@ const Products: React.FC = () => {
 
   // Função auxiliar para obter a URL da imagem
   const getImageUrl = (product: Product) => {
-    return product.images?.[0] || 'https://res.cloudinary.com/dpenlfh9l/image/upload/v1/gymp/placeholder-image';
+    return product.image || 'https://res.cloudinary.com/dpenlfh9l/image/upload/v1/gymp/no-image-placeholder.jpg';
   };
 
   const handleProductClick = (product: Product) => {

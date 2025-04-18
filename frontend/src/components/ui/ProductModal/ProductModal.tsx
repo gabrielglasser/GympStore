@@ -23,7 +23,14 @@ export const ProductModal: React.FC<ProductModalProps> = ({
         </button>
         <div className={styles.content}>
           <div className={styles.imageContainer}>
-            <img src={product.images[0]} alt={product.name} />
+            <img 
+              src={product.image} 
+              alt={product.name}
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = 'https://res.cloudinary.com/dpenlfh9l/image/upload/v1/gymp/no-image-placeholder.jpg';
+              }}
+            />
           </div>
           <div className={styles.info}>
             <div className={styles.category}>{product.category.name}</div>

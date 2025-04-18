@@ -1,5 +1,4 @@
 export interface Product {
-  imageUrl: string;
   id: string;
   name: string;
   description: string;
@@ -7,7 +6,7 @@ export interface Product {
   stock: number;
   brand: string;
   weight: number;
-  images: string[];
+  image: string;  
   flavor?: string;
   categoryId: string;
   category: Category;
@@ -73,5 +72,5 @@ export interface Address {
   state: string;
   postalCode: string;
   isDefault?: boolean;
-} 
+}
 
