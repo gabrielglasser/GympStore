@@ -79,3 +79,13 @@ export interface Address {
   isDefault?: boolean;
 }
 
+export interface Order {
+  id: string;
+  items: Array<{
+    productId: string;
+    quantity: number;
+  }>;
+  total: number;
+  status: string;
+  createdAt: string;
+}

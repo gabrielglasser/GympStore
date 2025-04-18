@@ -6,6 +6,7 @@ import styles from './PaymentModal.module.scss';
 import { orderService } from '../../services/orderService';
 import { toast } from 'react-toastify';
 import { formatCurrency } from '../../utils/formatCurrency';
+import { authService } from '../../services/authService';
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -28,18 +29,28 @@ export function PaymentModal({ isOpen, onClose, total, address, onPaymentComplet
   useEffect(() => {
     const loadPaymentDetails = async () => {
       try {
+        // Verificar token antes de fazer a requisição
+        const token = authService.getToken();
+        if (!token) {
+          toast.error('Sua sessão expirou. Por favor, faça login novamente.');
+          onClose();
+          return;
+        }
+
         const details = await orderService.getPaymentDetails(total);
         setPaymentDetails(details);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Erro ao carregar detalhes do pagamento:', error);
-        toast.error('Erro ao carregar opções de pagamento');
+        const message = error.response?.data?.message || 'Erro ao carregar opções de pagamento';
+        toast.error(message);
+        onClose();
       }
     };
 
     if (isOpen && total > 0) {
       loadPaymentDetails();
     }
-  }, [isOpen, total]);
+  }, [isOpen, total, onClose]);
 
   const formatCardNumber = (value: string) => {
     return value
