@@ -96,7 +96,8 @@ class ProductService {
       throw new ApiError(404, "Categoria não encontrada");
     }
 
-    let processedImage = input.images;
+
+    let processedImage = input.image;
     if (processedImage && processedImage.startsWith('http')) {
       try {
         const result = await cloudinary.uploader.upload(processedImage, {
