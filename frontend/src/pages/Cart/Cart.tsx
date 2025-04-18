@@ -139,6 +139,7 @@ const Cart: React.FC = () => {
   };
 
   const handleOpenPaymentModal = () => {
+    // Remover a verificação de autenticação aqui já que é feita no useEffect
     if (!address.postalCode || !address.street || !address.city || !address.state || !address.number || !address.neighborhood) {
       toast.error('Por favor, preencha todos os campos do endereço');
       return;
