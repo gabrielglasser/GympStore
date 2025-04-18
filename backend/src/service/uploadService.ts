@@ -1,41 +1,24 @@
-import cloudinary from '../config/cloudinary';
+import { v2 as cloudinary } from 'cloudinary';
+import { logger } from '../utils/logger';
 import { Readable } from 'stream';
 
 export class UploadService {
-  static async uploadImage(file: Express.Multer.File) {
+  static async uploadImage(file: Express.Multer.File): Promise<string> {
     try {
-      console.log('Recebendo arquivo para upload:', {
-        originalname: file.originalname,
-        mimetype: file.mimetype,
-        size: file.size
+      logger.info(`Iniciando upload da imagem: ${file.originalname}`);
+      logger.info(`Configuração do Cloudinary: ${cloudinary.config().cloud_name}`);
+
+      const result = await cloudinary.uploader.upload(file.path, {
+        folder: 'products',
+        use_filename: true,
+        unique_filename: true,
       });
 
-      return new Promise((resolve, reject) => {
-        const uploadStream = cloudinary.uploader.upload_stream(
-          {
-            folder: 'gymp',
-            resource_type: 'auto',
-          },
-          (error: any, result: any) => {
-            if (error) {
-              console.error('Erro no upload:', error);
-              reject(error);
-              return;
-            }
-            console.log('Upload realizado com sucesso:', result);
-            resolve({
-              url: result.secure_url,
-              public_id: result.public_id
-            });
-          }
-        );
-
-        const stream = Readable.from(file.buffer);
-        stream.pipe(uploadStream);
-      });
+      logger.info(`Upload bem-sucedido. URL da imagem: ${result.secure_url}`);
+      return result.secure_url;
     } catch (error) {
-      console.error('Erro detalhado no serviço de upload:', error);
-      throw error;
+      logger.error('Erro durante o upload da imagem:', error);
+      throw new Error('Erro ao processar imagem');
     }
   }
 
