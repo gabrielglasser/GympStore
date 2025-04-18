@@ -5,17 +5,33 @@ import path from 'path';
 export class UploadService {
   static async uploadImage(file: Express.Multer.File) {
     try {
+      console.log('Recebendo arquivo para upload:', {
+        originalname: file.originalname,
+        path: file.path,
+        size: file.size
+      });
+
+      if (!file.path || !fs.existsSync(file.path)) {
+        throw new Error('Arquivo não encontrado no caminho especificado');
+      }
+
       const result = await uploadToCloudinary(file);
       
-      // Remove o arquivo temporário após o upload
-      fs.unlinkSync(file.path);
+      // Tenta remover o arquivo temporário
+      try {
+        if (fs.existsSync(file.path)) {
+          fs.unlinkSync(file.path);
+        }
+      } catch (unlinkError) {
+        console.warn('Aviso: Não foi possível remover o arquivo temporário:', unlinkError);
+      }
       
       return {
         url: result.secure_url,
         public_id: result.public_id
       };
     } catch (error) {
-      console.error('Erro no serviço de upload:', error);
+      console.error('Erro detalhado no serviço de upload:', error);
       throw error;
     }
   }
@@ -29,4 +45,4 @@ export class UploadService {
       throw error;
     }
   }
-} 
+}
