@@ -11,7 +11,7 @@ interface CartItemProps {
       id: string;
       name: string;
       price: number;
-      image: string; // Atualizado de images para image
+      image: string; 
       flavor?: string;
       stock: number;
     };

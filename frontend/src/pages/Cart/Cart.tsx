@@ -11,6 +11,7 @@ import { CartItem, PaymentData, Address } from '../../types';
 import { correiosService } from '../../services/correiosService';
 import { orderService } from '../../services/orderService';
 import { addressService } from '../../services/addressService';
+import { authService } from '../../services/authService';
 import styles from './Cart.module.scss';
 import toast from 'react-hot-toast';
 import { CartItem as CartItemComponent } from '../../components/cart/CartItem';
@@ -35,7 +36,8 @@ const Cart: React.FC = () => {
   });
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    const token = authService.getToken();
+    if (!token || !isAuthenticated) {
       navigate('/auth');
       toast.error('Faça login para acessar o carrinho');
       return;
@@ -138,8 +140,14 @@ const Cart: React.FC = () => {
     }
   };
 
-  const handleOpenPaymentModal = () => {
-    // Remover a verificação de autenticação aqui já que é feita no useEffect
+  const handleOpenPaymentModal = async () => {
+    const token = authService.getToken();
+    if (!token || !isAuthenticated) {
+      navigate('/auth');
+      toast.error('Faça login para continuar');
+      return;
+    }
+
     if (!address.postalCode || !address.street || !address.city || !address.state || !address.number || !address.neighborhood) {
       toast.error('Por favor, preencha todos os campos do endereço');
       return;
