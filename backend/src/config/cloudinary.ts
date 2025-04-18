@@ -1,11 +1,12 @@
 import { v2 as cloudinary } from 'cloudinary';
 import dotenv from 'dotenv';
+import { logger } from '../utils/logger';
 
 dotenv.config();
 
 if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
-  console.error('Variáveis de ambiente do Cloudinary não configuradas!');
-  process.exit(1);
+  logger.error('Variáveis de ambiente do Cloudinary não configuradas!');
+  throw new Error('Configuração do Cloudinary ausente');
 }
 
 cloudinary.config({

@@ -1,34 +1,38 @@
 import { v2 as cloudinary } from 'cloudinary';
 import { logger } from '../utils/logger';
-import { Readable } from 'stream';
 
 export class UploadService {
-  static async uploadImage(file: Express.Multer.File): Promise<string> {
+  static async uploadImage(file: Express.Multer.File): Promise<{ url: string; public_id: string }> {
     try {
       if (!file || !file.buffer) {
         throw new Error('Arquivo inválido');
       }
 
-      return new Promise((resolve, reject) => {
-        const uploadStream = cloudinary.uploader.upload_stream(
-          {
-            folder: 'products',
-            resource_type: 'auto'
-          },
-          (error, result) => {
-            if (error) {
-              reject(new Error('Erro ao processar imagem'));
-              return;
-            }
-            resolve(result.secure_url);
-          }
-        );
+      const base64Image = file.buffer.toString('base64');
+      const dataURI = `data:${file.mimetype};base64,${base64Image}`;
 
-        // Criar um stream legível a partir do buffer
-        const stream = Readable.from(file.buffer);
-        stream.pipe(uploadStream);
+      const result = await new Promise<any>((resolve, reject) => {
+        cloudinary.uploader.upload(dataURI, {
+          folder: 'products',
+          resource_type: 'auto'
+        }, (error, result) => {
+          if (error) {
+            logger.error('Erro no upload para Cloudinary:', error);
+            reject(error);
+            return;
+          }
+          resolve(result);
+        });
       });
+
+      logger.info('Upload realizado com sucesso:', { public_id: result.public_id });
+      
+      return {
+        url: result.secure_url,
+        public_id: result.public_id
+      };
     } catch (error) {
+      logger.error('Erro ao fazer upload da imagem:', error);
       throw new Error('Erro ao processar imagem');
     }
   }
@@ -38,6 +42,7 @@ export class UploadService {
       const result = await cloudinary.uploader.destroy(publicId);
       return result;
     } catch (error) {
+      logger.error('Erro ao deletar imagem:', error);
       throw error;
     }
   }
