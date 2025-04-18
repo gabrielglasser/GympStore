@@ -47,27 +47,43 @@ class ProductService {
 
   private async uploadExternalImageToCloudinary(imageUrl: string): Promise<string> {
     try {
-      // Baixa a imagem
-      const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
-      const buffer = Buffer.from(response.data, 'binary');
+      console.log('Iniciando download da imagem externa:', imageUrl);
       
-      // Salva temporariamente
-      const tempPath = path.join('tmp', `temp-${Date.now()}.jpg`);
-      fs.writeFileSync(tempPath, buffer);
-
-      // Upload para o Cloudinary usando a API v2
-      const result = await cloudinary.uploader.upload(tempPath, {
-        folder: 'gymp',
-        resource_type: 'auto'
+      const response = await axios.get(imageUrl, { 
+        responseType: 'arraybuffer',
+        timeout: 10000 
       });
       
-      // Remove arquivo temporário
-      fs.unlinkSync(tempPath);
+      console.log('Imagem baixada com sucesso, convertendo para base64');
+      const buffer = Buffer.from(response.data, 'binary');
+      const base64Image = buffer.toString('base64');
+      const dataURI = `data:${response.headers['content-type']};base64,${base64Image}`;
       
+      console.log('Iniciando upload para Cloudinary');
+      const result = await new Promise<any>((resolve, reject) => {
+        cloudinary.uploader.upload(dataURI, {
+          folder: 'gymp',
+          resource_type: 'auto'
+        }, (error, result) => {
+          if (error) {
+            console.error('Erro no upload Cloudinary:', error);
+            reject(error);
+            return;
+          }
+          resolve(result);
+        });
+      });
+
+      console.log('Upload concluído com sucesso:', result.secure_url);
       return result.secure_url;
+      
     } catch (error) {
-      console.error('Erro ao fazer upload da imagem:', error);
-      throw new ApiError(500, 'Erro ao processar imagem');
+      console.error('Erro detalhado no processamento da imagem:', {
+        error,
+        message: error instanceof Error ? error.message : 'Erro desconhecido',
+        stack: error instanceof Error ? error.stack : undefined
+      });
+      throw new ApiError(500, 'Erro ao processar imagem do produto');
     }
   }
 
@@ -80,15 +96,18 @@ class ProductService {
       throw new ApiError(404, "Categoria não encontrada");
     }
 
-    // Processa as imagens
-    const processedImages = await Promise.all(
-      input.images.map(async (image: string) => {
-        if (image.startsWith('http')) {
-          return await this.uploadExternalImageToCloudinary(image);
-        }
-        return image;
-      })
-    );
+    let processedImage = input.images;
+    if (processedImage && processedImage.startsWith('http')) {
+      try {
+        const result = await cloudinary.uploader.upload(processedImage, {
+          folder: 'gymp',
+          resource_type: 'auto'
+        });
+        processedImage = result.secure_url;
+      } catch (error) {
+        throw new ApiError(500, "Erro ao fazer upload da imagem");
+      }
+    }
 
     return await prisma.product.create({
       data: {
@@ -99,7 +118,7 @@ class ProductService {
         categoryId: input.categoryId,
         brand: input.brand,
         weight: input.weight,
-        images: processedImages,
+        image: processedImage, 
         flavor: input.flavor || null,
       },
       include: {
