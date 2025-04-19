@@ -7,8 +7,8 @@
     },
     "servers": [
       {
-        "url": "http://localhost:8000/api",
-        "description": "Servidor local de desenvolvimento"
+        "url": "https://gymp-store-backend.vercel.app",
+        "description": "Servidor de produção"
       }
     ],
     "tags": [
