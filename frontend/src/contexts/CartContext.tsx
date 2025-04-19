@@ -84,7 +84,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(true);
       const cart = await cartService.removeFromCart(itemId);
       setItems(cart.items);
-      toast.success('Produto removido do carrinho');
+
     } catch (error) {
       console.error('Erro ao remover do carrinho:', error);
       toast.error('Erro ao remover produto do carrinho');
@@ -98,7 +98,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(true);
       await cartService.clearCart();
       setItems([]);
-      toast.success('Carrinho limpo com sucesso');
+      // Removida notificação de sucesso que estava duplicada
     } catch (error) {
       console.error('Erro ao limpar carrinho:', error);
       toast.error('Erro ao limpar carrinho');

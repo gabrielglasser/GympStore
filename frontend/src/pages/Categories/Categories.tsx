@@ -1,10 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCategories } from '../../hooks/useCategories';
 import { Category } from '../../types';
 import { AlertCircle } from 'lucide-react';
 
 const Categories: React.FC = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []); 
+
   const { categories, isLoading, error } = useCategories();
 
   if (error) {

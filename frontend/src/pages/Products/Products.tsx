@@ -32,6 +32,10 @@ const Products: React.FC = () => {
   }, [searchParams, categories]);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [searchParams]); // Rola para o topo quando mudar os parâmetros de busca
+
+  useEffect(() => {
     setFilteredProducts(() => {
       let result = [...products];
       
@@ -52,12 +56,14 @@ const Products: React.FC = () => {
 
   const handleCategoryChange = (categoryId: string) => {
     setSelectedCategory(categoryId);
+    setIsFilterOpen(false); // Fecha o filtro ao selecionar uma categoria
     const category = categories.find(cat => cat.id === categoryId);
     if (category) {
       setSearchParams({ categoria: category.slug });
     } else {
       setSearchParams({});
     }
+    window.scrollTo(0, 0); 
   };
 
   const handleAddToCart = (product: Product) => {
