@@ -46,19 +46,21 @@ const Categories: React.FC = () => {
               <Link
                 key={category.id}
                 to={`/produtos?categoria=${category.slug}`}
-                className="group relative h-64 rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300"
+                className="group relative pt-[75%] rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300"
               >
-                <img
-                  src={category.image}
-                  alt={category.name}
-                  className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent group-hover:from-black/90 transition-all duration-300" />
-                <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                  <h2 className="text-2xl font-bold mb-2">{category.name}</h2>
-                  <p className="text-sm text-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    {category.description}
-                  </p>
+                <div className="absolute inset-0">
+                  <img
+                    src={category.image}
+                    alt={category.name}
+                    className="w-full h-full object-contain bg-white p-4"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent group-hover:from-black/90 transition-all duration-300" />
+                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                    <h2 className="text-2xl font-bold mb-2">{category.name}</h2>
+                    <p className="text-sm text-gray-200 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      {category.description}
+                    </p>
+                  </div>
                 </div>
               </Link>
             ))}

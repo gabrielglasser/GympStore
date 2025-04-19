@@ -38,6 +38,21 @@
     box-shadow: $shadow-lg;
   }
 
+  .imageContainer {
+    width: 100%;
+    height: 300px;
+    overflow: hidden;
+    position: relative;
+    
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background-color: #fff;
+      padding: 1rem;
+    }
+  }
+
   .image {
     width: 100%;
     height: 240px;

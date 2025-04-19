@@ -152,14 +152,14 @@ const Products: React.FC = () => {
                     className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
                     onClick={() => handleProductClick(product)}
                   >
-                    <div className="relative w-full h-48">
+                    <div className="relative w-full pt-[100%]"> 
                       <img
                         src={getImageUrl(product)}
                         alt={product.name}
-                        className="w-full h-full object-cover"
+                        className="absolute top-0 left-0 w-full h-full object-contain p-4 bg-white"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
-                          target.src = 'https://res.cloudinary.com/dpenlfh9l/image/upload/v1/gymp/placeholder-image';
+                          target.src = 'https://res.cloudinary.com/dpenlfh9l/image/upload/v1/gymp/no-image-placeholder.jpg';
                         }}
                       />
                       {product.stock === 0 && (
