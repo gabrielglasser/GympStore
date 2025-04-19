@@ -1,5 +1,5 @@
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Home from '../pages/Home';
 import Products from '../pages/Products/Products';
 import Categories from '../pages/Categories/Categories';
@@ -10,6 +10,12 @@ import About from '../pages/About/About';
 import PrivacyPolicy from '../pages/PrivacyPolicy/PrivacyPolicy';
 
 export const AppRoutes: React.FC = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
   return (
     <Routes>
       <Route path="/" element={<Home />} />

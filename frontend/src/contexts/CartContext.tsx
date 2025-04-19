@@ -51,7 +51,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(true);
       const cart = await cartService.addToCart(product.id, quantity);
       setItems(cart.items);
-      // Removida a notificação duplicada, mantendo apenas a do componente que chama esta função
+      toast.success('Produto adicionado ao carrinho!');
     } catch (error: any) {
       console.error('Erro ao adicionar ao carrinho:', error);
       const message = error.response?.data?.message || 'Erro ao adicionar ao carrinho';
