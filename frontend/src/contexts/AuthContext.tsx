@@ -24,7 +24,11 @@ const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<User | null>(() => authService.getUser());
+  const [user, setUser] = useState<User | null>(() => {
+    const storedUser = authService.getUser();
+    const token = authService.getToken();
+    return token && storedUser ? storedUser : null;
+  });
 
   const signIn = useCallback(async (email: string, password: string) => {
     try {
@@ -33,12 +37,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(response.user);
       }
       toast.success('Login realizado com sucesso!');
-      navigate('/');
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Erro ao fazer login');
       throw error;
     }
-  }, [navigate]);
+  }, []);
 
   const signUp = useCallback(async (name: string, email: string, password: string) => {
     try {

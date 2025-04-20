@@ -1,9 +1,18 @@
 import swaggerUi from 'swagger-ui-express';
-import swaggerDocument from './docs/swagger.json'; 
+import swaggerDocument from './docs/swagger.json';
 import { Router } from 'express';
 
 const router = Router();
 
-router.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+const options = {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: "GympStore API Documentation",
+  swaggerOptions: {
+    persistAuthorization: true
+  }
+};
+
+router.use('/', swaggerUi.serve);
+router.get('/', swaggerUi.setup(swaggerDocument, options));
 
 export default router;

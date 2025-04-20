@@ -1,11 +1,13 @@
-import React, { useState, FormEvent } from 'react';
+import React, { useState, FormEvent, useEffect } from 'react';
 import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { Button } from '../../components/ui/Button/Button';
 import styles from './Auth.module.scss';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Auth: React.FC = () => {
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [isSignUpMode, setIsSignUpMode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -18,6 +20,12 @@ const Auth: React.FC = () => {
     password: '',
     confirmPassword: ''
   });
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSignIn = async (e: FormEvent) => {
     e.preventDefault();

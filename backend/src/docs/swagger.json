@@ -1,418 +1,54 @@
 {
-    "openapi": "3.0.0",
-    "info": {
-      "title": "API GympStore",
-      "description": "API completa para e-commerce de suplementos fitness",
-      "version": "1.0.0"
+  "openapi": "3.0.0",
+  "info": {
+    "title": "GympStore API",
+    "description": "API completa da GympStore - Loja de Suplementos",
+    "version": "1.0.0",
+    "contact": {
+      "email": "gbsantos.dev@gmail.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://gymp-store-backend.vercel.app/api",
+      "description": "Servidor de Produção"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "Autenticação e gerenciamento de sessão"
     },
-    "servers": [
-      {
-        "url": "https://gymp-store-backend.vercel.app",
-        "description": "Servidor de produção"
-      }
-    ],
-    "tags": [
-      {
-        "name": "Autenticação",
-        "description": "Operações de login e gestão de sessão"
-      },
-      {
-        "name": "Usuários",
-        "description": "Operações com usuários"
-      },
-      {
-        "name": "Produtos",
-        "description": "Gestão de produtos"
-      },
-      {
-        "name": "Categorias",
-        "description": "Gestão de categorias"
-      },
-      {
-        "name": "Carrinho",
-        "description": "Operações com carrinho de compras"
-      },
-      {
-        "name": "Pedidos",
-        "description": "Gestão de pedidos"
-      },
-      {
-        "name": "Endereços",
-        "description": "Gestão de endereços dos usuários"
-      }
-    ],
-    "paths": {
-      "/auth/login": {
-        "post": {
-          "tags": [
-            "Autenticação"
-          ],
-          "summary": "Login do usuário",
-          "requestBody": {
-            "required": true,
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "email": {
-                      "type": "string",
-                      "format": "email",
-                      "example": "usuario@exemplo.com"
-                    },
-                    "password": {
-                      "type": "string",
-                      "example": "SenhaSegura123"
-                    }
-                  },
-                  "required": [
-                    "email",
-                    "password"
-                  ]
-                }
-              }
-            }
-          },
-          "responses": {
-            "200": {
-              "description": "Login bem-sucedido",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "object",
-                    "properties": {
-                      "token": {
-                        "type": "string",
-                        "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-                      },
-                      "user": {
-                        "$ref": "#/components/schemas/User"
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "401": {
-              "description": "Credenciais inválidas"
-            }
-          }
-        }
-      },
-      "/users": {
-        "post": {
-          "tags": [
-            "Usuários"
-          ],
-          "summary": "Criar novo usuário",
-          "requestBody": {
-            "required": true,
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateUserInput"
-                }
-              }
-            }
-          },
-          "responses": {
-            "201": {
-              "description": "Usuário criado com sucesso",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/User"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "get": {
-          "tags": [
-            "Usuários"
-          ],
-          "summary": "Listar todos usuários (apenas admin)",
-          "security": [
-            {
-              "bearerAuth": []
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "Lista de usuários",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/User"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "/users/{id}": {
-        "get": {
-          "tags": [
-            "Usuários"
-          ],
-          "summary": "Obter usuário por ID",
-          "security": [
-            {
-              "bearerAuth": []
-            }
-          ],
-          "parameters": [
-            {
-              "name": "id",
-              "in": "path",
-              "required": true,
-              "schema": {
-                "type": "string",
-                "format": "uuid"
-              }
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "Dados do usuário",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/User"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "/products": {
-        "get": {
-          "tags": [
-            "Produtos"
-          ],
-          "summary": "Listar todos produtos",
-          "responses": {
-            "200": {
-              "description": "Lista de produtos",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/Product"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "post": {
-          "tags": [
-            "Produtos"
-          ],
-          "summary": "Criar novo produto (apenas admin)",
-          "security": [
-            {
-              "bearerAuth": []
-            }
-          ],
-          "requestBody": {
-            "required": true,
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateProductInput"
-                }
-              }
-            }
-          },
-          "responses": {
-            "201": {
-              "description": "Produto criado",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/Product"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "/cart": {
-        "get": {
-          "tags": [
-            "Carrinho"
-          ],
-          "summary": "Obter carrinho do usuário",
-          "security": [
-            {
-              "bearerAuth": []
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "Carrinho do usuário",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/Cart"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "post": {
-          "tags": [
-            "Carrinho"
-          ],
-          "summary": "Adicionar item ao carrinho",
-          "security": [
-            {
-              "bearerAuth": []
-            }
-          ],
-          "requestBody": {
-            "required": true,
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AddToCartInput"
-                }
-              }
-            }
-          },
-          "responses": {
-            "200": {
-              "description": "Item adicionado",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/Cart"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "/orders": {
-        "post": {
-          "tags": [
-            "Pedidos"
-          ],
-          "summary": "Criar novo pedido",
-          "security": [
-            {
-              "bearerAuth": []
-            }
-          ],
-          "requestBody": {
-            "required": true,
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateOrderInput"
-                }
-              }
-            }
-          },
-          "responses": {
-            "201": {
-              "description": "Pedido criado",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/Order"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "get": {
-          "tags": [
-            "Pedidos"
-          ],
-          "summary": "Listar pedidos do usuário",
-          "security": [
-            {
-              "bearerAuth": []
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "Lista de pedidos",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/Order"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "/users/{userId}/addresses": {
-        "post": {
-          "tags": [
-            "Endereços"
-          ],
-          "summary": "Adicionar endereço ao usuário",
-          "security": [
-            {
-              "bearerAuth": []
-            }
-          ],
-          "parameters": [
-            {
-              "name": "userId",
-              "in": "path",
-              "required": true,
-              "schema": {
-                "type": "string",
-                "format": "uuid"
-              }
-            }
-          ],
-          "requestBody": {
-            "required": true,
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateAddressInput"
-                }
-              }
-            }
-          },
-          "responses": {
-            "201": {
-              "description": "Endereço criado",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/Address"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+    {
+      "name": "Users",
+      "description": "Gerenciamento de usuários"
     },
+    {
+      "name": "Products",
+      "description": "Gerenciamento de produtos"
+    },
+    {
+      "name": "Categories",
+      "description": "Gerenciamento de categorias"
+    },
+    {
+      "name": "Cart",
+      "description": "Operações do carrinho de compras"
+    },
+    {
+      "name": "Orders",
+      "description": "Gerenciamento de pedidos"
+    },
+    {
+      "name": "Addresses",
+      "description": "Gerenciamento de endereços"
+    },
+    {
+      "name": "Payment",
+      "description": "Processamento de pagamentos"
+    }
+  ],
+  "components": {
     "securitySchemes": {
       "bearerAuth": {
         "type": "http",
@@ -420,320 +56,166 @@
         "bearerFormat": "JWT"
       }
     },
-    "components": {
-      "schemas": {
-        "User": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "name": {
-              "type": "string"
-            },
-            "email": {
-              "type": "string",
-              "format": "email"
-            },
-            "role": {
-              "type": "string",
-              "enum": [
-                "USER",
-                "ADMIN"
-              ]
-            }
-          },
-          "required": [
-            "id",
-            "name",
-            "email",
-            "role"
-          ]
-        },
-        "CreateUserInput": {
-          "type": "object",
-          "properties": {
-            "name": {
-              "type": "string",
-              "example": "João Silva"
-            },
-            "email": {
-              "type": "string",
-              "format": "email",
-              "example": "joao@exemplo.com"
-            },
-            "password": {
-              "type": "string",
-              "example": "SenhaSegura123"
-            }
-          },
-          "required": [
-            "name",
-            "email",
-            "password"
-          ]
-        },
-        "Product": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "name": {
-              "type": "string"
-            },
-            "description": {
-              "type": "string"
-            },
-            "price": {
-              "type": "number",
-              "format": "float"
-            },
-            "stock": {
-              "type": "integer"
-            }
-          },
-          "required": [
-            "id",
-            "name",
-            "price",
-            "stock"
-          ]
-        },
-        "CreateProductInput": {
-          "type": "object",
-          "properties": {
-            "name": {
-              "type": "string",
-              "example": "Whey Protein"
-            },
-            "description": {
-              "type": "string",
-              "example": "Proteína isolada de alta qualidade"
-            },
-            "price": {
-              "type": "number",
-              "format": "float",
-              "example": 129.9
-            },
-            "stock": {
-              "type": "integer",
-              "example": 100
-            },
-            "categoryId": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "required": [
-            "name",
-            "description",
-            "price",
-            "stock",
-            "categoryId"
-          ]
-        },
-        "Cart": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "items": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/CartItem"
-              }
-            }
-          },
-          "required": [
-            "id",
-            "items"
-          ]
-        },
-        "CartItem": {
-          "type": "object",
-          "properties": {
-            "product": {
-              "$ref": "#/components/schemas/Product"
-            },
-            "quantity": {
-              "type": "integer"
-            }
-          },
-          "required": [
-            "product",
-            "quantity"
-          ]
-        },
-        "AddToCartInput": {
-          "type": "object",
-          "properties": {
-            "productId": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "quantity": {
-              "type": "integer"
-            }
-          },
-          "required": [
-            "productId",
-            "quantity"
-          ]
-        },
-        "Order": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "status": {
-              "type": "string",
-              "enum": [
-                "PENDING",
-                "PROCESSING",
-                "SHIPPED",
-                "DELIVERED",
-                "CANCELLED"
-              ]
-            },
-            "total": {
-              "type": "number",
-              "format": "float"
-            },
-            "items": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/OrderItem"
-              }
-            }
-          },
-          "required": [
-            "id",
-            "status",
-            "total",
-            "items"
-          ]
-        },
-        "OrderItem": {
-          "type": "object",
-          "properties": {
-            "product": {
-              "$ref": "#/components/schemas/Product"
-            },
-            "quantity": {
-              "type": "integer"
-            },
-            "price": {
-              "type": "number",
-              "format": "float"
-            }
-          },
-          "required": [
-            "product",
-            "quantity",
-            "price"
-          ]
-        },
-        "CreateOrderInput": {
-          "type": "object",
-          "properties": {
-            "addressId": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "items": {
-              "type": "array",
-              "items": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "role": { "type": "string", "enum": ["USER", "ADMIN"] }
+        }
+      },
+      "Product": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "price": { "type": "number" },
+          "stock": { "type": "integer" },
+          "image": { "type": "string" },
+          "categoryId": { "type": "string", "format": "uuid" }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Login do usuário",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
                 "type": "object",
                 "properties": {
-                  "productId": {
+                  "email": {
                     "type": "string",
-                    "format": "uuid"
+                    "format": "email"
                   },
-                  "quantity": {
-                    "type": "integer"
+                  "password": {
+                    "type": "string",
+                    "format": "password"
                   }
-                },
-                "required": [
-                  "productId",
-                  "quantity"
-                ]
+                }
               }
             }
-          },
-          "required": [
-            "addressId",
-            "items"
-          ]
+          }
         },
-        "Address": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "street": {
-              "type": "string"
-            },
-            "city": {
-              "type": "string"
-            },
-            "state": {
-              "type": "string"
-            },
-            "postalCode": {
-              "type": "string"
-            },
-            "isDefault": {
-              "type": "boolean"
+        "responses": {
+          "200": {
+            "description": "Login realizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": { "type": "string" },
+                    "user": { "$ref": "#/components/schemas/User" }
+                  }
+                }
+              }
             }
-          },
-          "required": [
-            "id",
-            "street",
-            "city",
-            "state",
-            "postalCode"
-          ]
+          }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Obtém dados do usuário atual",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Dados do usuário",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/User" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products": {
+      "get": {
+        "tags": ["Products"],
+        "summary": "Lista todos os produtos",
+        "responses": {
+          "200": {
+            "description": "Lista de produtos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Product" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Products"],
+        "summary": "Cria um novo produto",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "description": { "type": "string" },
+                  "price": { "type": "number" },
+                  "stock": { "type": "integer" },
+                  "categoryId": { "type": "string", "format": "uuid" }
+                }
+              }
+            }
+          }
         },
-        "CreateAddressInput": {
-          "type": "object",
-          "properties": {
-            "street": {
-              "type": "string",
-              "example": "Rua das Flores, 123"
-            },
-            "city": {
-              "type": "string",
-              "example": "São Paulo"
-            },
-            "state": {
-              "type": "string",
-              "example": "SP"
-            },
-            "postalCode": {
-              "type": "string",
-              "example": 342016
-            },
-            "isDefault": {
-              "type": "boolean",
-              "example": true
+        "responses": {
+          "201": {
+            "description": "Produto criado com sucesso"
+          }
+        }
+      }
+    },
+    "/cart": {
+      "get": {
+        "tags": ["Cart"],
+        "summary": "Obtém o carrinho do usuário",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Carrinho encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "productId": { "type": "string" },
+                          "quantity": { "type": "integer" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
             }
-          },
-          "required": [
-            "street",
-            "city",
-            "state",
-            "postalCode"
-          ]
+          }
         }
       }
     }
   }
+}
