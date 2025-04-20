@@ -5,32 +5,25 @@
       "src": "src/server.ts",
       "use": "@vercel/node",
       "config": {
-        "includeFiles": ["dist/**", "src/**"],
-        "maxLambdaSize": "50mb"
-      }
-    },
-    {
-      "src": "src/index.ts",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": ["src/docs/swagger.json"]
+        "includeFiles": [
+          "src/docs/**",
+          "dist/**"
+        ]
       }
     }
   ],
   "routes": [
     {
+      "src": "/api-docs/(.*)",
+      "dest": "src/server.ts"
+    },
+    {
       "src": "/api/(.*)",
-      "dest": "src/server.ts",
-      "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-      "headers": {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
-        "Access-Control-Allow-Headers": "X-Requested-With, Content-Type, Accept, Authorization"
-      }
+      "dest": "src/server.ts"
     },
     {
       "src": "/(.*)",
-      "dest": "src/index.ts"
+      "dest": "src/server.ts"
     }
   ]
 }

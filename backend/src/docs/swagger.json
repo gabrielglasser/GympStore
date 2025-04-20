@@ -75,7 +75,53 @@
           "price": { "type": "number" },
           "stock": { "type": "integer" },
           "image": { "type": "string" },
-          "categoryId": { "type": "string", "format": "uuid" }
+          "categoryId": { "type": "string", "format": "uuid" },
+          "brand": { "type": "string" },
+          "weight": { "type": "number" },
+          "flavor": { "type": "string" }
+        }
+      },
+      "Category": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "slug": { "type": "string" },
+          "image": { "type": "string" }
+        }
+      },
+      "Address": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "street": { "type": "string" },
+          "number": { "type": "string" },
+          "complement": { "type": "string" },
+          "neighborhood": { "type": "string" },
+          "city": { "type": "string" },
+          "state": { "type": "string" },
+          "postalCode": { "type": "string" },
+          "isDefault": { "type": "boolean" }
+        }
+      },
+      "Order": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "userId": { "type": "string", "format": "uuid" },
+          "status": { "type": "string", "enum": ["PENDING", "PAID", "SHIPPED", "DELIVERED", "CANCELED"] },
+          "total": { "type": "number" },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "productId": { "type": "string", "format": "uuid" },
+                "quantity": { "type": "integer" },
+                "price": { "type": "number" }
+              }
+            }
+          }
         }
       }
     }
@@ -92,14 +138,8 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "email": {
-                    "type": "string",
-                    "format": "email"
-                  },
-                  "password": {
-                    "type": "string",
-                    "format": "password"
-                  }
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string", "format": "password" }
                 }
               }
             }
@@ -123,17 +163,49 @@
         }
       }
     },
-    "/auth/me": {
-      "get": {
-        "tags": ["Auth"],
-        "summary": "Obtém dados do usuário atual",
-        "security": [{ "bearerAuth": [] }],
+    "/users": {
+      "post": {
+        "tags": ["Users"],
+        "summary": "Cria um novo usuário",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string", "format": "password" }
+                }
+              }
+            }
+          }
+        },
         "responses": {
-          "200": {
-            "description": "Dados do usuário",
+          "201": {
+            "description": "Usuário criado com sucesso",
             "content": {
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/User" }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["Users"],
+        "summary": "Lista todos os usuários",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Lista de usuários",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/User" }
+                }
               }
             }
           }
@@ -166,22 +238,18 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "name": { "type": "string" },
-                  "description": { "type": "string" },
-                  "price": { "type": "number" },
-                  "stock": { "type": "integer" },
-                  "categoryId": { "type": "string", "format": "uuid" }
-                }
-              }
+              "schema": { "$ref": "#/components/schemas/Product" }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "Produto criado com sucesso"
+            "description": "Produto criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Product" }
+              }
+            }
           }
         }
       }
@@ -199,6 +267,7 @@
                 "schema": {
                   "type": "object",
                   "properties": {
+                    "id": { "type": "string", "format": "uuid" },
                     "items": {
                       "type": "array",
                       "items": {
@@ -211,6 +280,53 @@
                     }
                   }
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders": {
+      "post": {
+        "tags": ["Orders"],
+        "summary": "Cria um novo pedido",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "addressId": { "type": "string", "format": "uuid" },
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "productId": { "type": "string", "format": "uuid" },
+                        "quantity": { "type": "integer" }
+                      }
+                    }
+                  },
+                  "payment": {
+                    "type": "object",
+                    "properties": {
+                      "method": { "type": "string", "enum": ["CREDIT_CARD", "DEBIT_CARD", "PIX", "BOLETO"] },
+                      "installments": { "type": "integer" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pedido criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Order" }
               }
             }
           }
