@@ -8,6 +8,13 @@
         "includeFiles": ["dist/**", "src/**"],
         "maxLambdaSize": "50mb"
       }
+    },
+    {
+      "src": "src/index.ts",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["src/docs/swagger.json"]
+      }
     }
   ],
   "routes": [
@@ -23,7 +30,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "src/server.ts"
+      "dest": "src/index.ts"
     }
   ]
 }
