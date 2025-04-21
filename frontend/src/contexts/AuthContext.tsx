@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useCallback, useEffect } fr
 import { authService } from '../services/authService';
 import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import api from '../services/api';
 
 interface User {
   id: string;
@@ -25,15 +26,32 @@ const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [user, setUser] = useState<User | null>(() => {
+  const [user, setUser] = useState<User | null>(null);
+
+  const checkAuth = useCallback(async () => {
     try {
       const token = authService.getToken();
-      const storedUser = authService.getUser();
-      return token && storedUser ? storedUser : null;
-    } catch {
-      return null;
+      if (!token) {
+        setUser(null);
+        return;
+      }
+
+      // Tenta buscar dados do usuário para validar o token
+      const response = await api.get('/auth/me');
+      setUser(response.data.data);
+    } catch (error) {
+      // Se houver erro (token inválido/expirado), fazer logout
+      authService.signOut();
+      setUser(null);
+      if (location.pathname !== '/auth') {
+        navigate('/auth', { state: { from: location }, replace: true });
+      }
     }
-  });
+  }, [navigate, location]);
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
 
   const signIn = useCallback(async (email: string, password: string) => {
     try {
@@ -67,13 +85,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
     navigate('/auth');
   }, [navigate]);
-
-  useEffect(() => {
-    const token = authService.getToken();
-    if (!token && location.pathname !== '/auth') {
-      navigate('/auth');
-    }
-  }, [location, navigate]);
 
   return (
     <AuthContext.Provider 
