@@ -1,8 +1,8 @@
 /* eslint-disable react-refresh/only-export-components */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { authService } from '../services/authService';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 interface User {
@@ -24,10 +24,15 @@ const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [user, setUser] = useState<User | null>(() => {
-    const storedUser = authService.getUser();
-    const token = authService.getToken();
-    return token && storedUser ? storedUser : null;
+    try {
+      const token = authService.getToken();
+      const storedUser = authService.getUser();
+      return token && storedUser ? storedUser : null;
+    } catch {
+      return null;
+    }
   });
 
   const signIn = useCallback(async (email: string, password: string) => {
@@ -62,6 +67,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
     navigate('/auth');
   }, [navigate]);
+
+  useEffect(() => {
+    const token = authService.getToken();
+    if (!token && location.pathname !== '/auth') {
+      navigate('/auth');
+    }
+  }, [location, navigate]);
 
   return (
     <AuthContext.Provider 

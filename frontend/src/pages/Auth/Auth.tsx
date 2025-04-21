@@ -3,11 +3,12 @@ import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { Button } from '../../components/ui/Button/Button';
 import styles from './Auth.module.scss';
 import { useAuth } from '../../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const Auth: React.FC = () => {
   const { signIn, signUp, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isSignUpMode, setIsSignUpMode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -23,9 +24,10 @@ const Auth: React.FC = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/');
+      const from = (location.state as any)?.from?.pathname || '/';
+      navigate(from, { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, location]);
 
   const handleSignIn = async (e: FormEvent) => {
     e.preventDefault();
